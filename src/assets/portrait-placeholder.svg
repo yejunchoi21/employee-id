@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 640" role="img" aria-label="Employee portrait placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7eb6d9"/>
+      <stop offset="55%" stop-color="#3d7aa8"/>
+      <stop offset="100%" stop-color="#1e4d72"/>
+    </linearGradient>
+    <linearGradient id="shirt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f4f7fb"/>
+      <stop offset="100%" stop-color="#c5d4e4"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f0c7a8"/>
+      <stop offset="100%" stop-color="#d9a882"/>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="640" fill="url(#bg)"/>
+  <ellipse cx="240" cy="690" rx="210" ry="150" fill="#0f4c81" opacity="0.35"/>
+  <path d="M90 640 C110 470 170 410 240 410 C310 410 370 470 390 640 Z" fill="url(#shirt)"/>
+  <path d="M205 430 L240 520 L275 430 Z" fill="#0f4c81"/>
+  <circle cx="240" cy="270" r="105" fill="url(#skin)"/>
+  <path d="M145 250 C155 170 200 140 240 138 C280 140 325 170 335 250 C320 195 285 175 240 175 C195 175 160 195 145 250 Z" fill="#2c3e50"/>
+  <ellipse cx="205" cy="275" rx="10" ry="12" fill="#2c3e50"/>
+  <ellipse cx="275" cy="275" rx="10" ry="12" fill="#2c3e50"/>
+  <path d="M220 315 Q240 330 260 315" fill="none" stroke="#b88468" stroke-width="6" stroke-linecap="round"/>
+</svg>

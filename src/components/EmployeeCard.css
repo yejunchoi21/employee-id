@@ -1,0 +1,185 @@
+.employee-card {
+  --card-navy: #0f4c81;
+  --card-cyan: #2aa4d8;
+  --card-ink: #0f172a;
+  --card-muted: #475569;
+
+  position: relative;
+  width: min(100%, 22rem);
+  margin: 0 auto;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 0.85rem;
+  border: 2px solid #1e293b;
+  box-shadow:
+    0 16px 36px rgba(15, 35, 60, 0.28),
+    0 1px 0 rgba(255, 255, 255, 0.2) inset;
+  color: var(--card-ink);
+  isolation: isolate;
+}
+
+.employee-card__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  pointer-events: none;
+}
+
+.employee-card__header {
+  position: absolute;
+  top: 0.7rem;
+  left: 0.7rem;
+  right: 0.7rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+  max-width: calc(100% - 1.4rem);
+  padding: 0.35rem 0.55rem 0.35rem 0.35rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+}
+
+.employee-card__logo {
+  display: grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: var(--card-navy);
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.employee-card__logo-mark {
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.employee-card__company {
+  margin: 0;
+  min-width: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--card-navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.employee-card__panel {
+  position: absolute;
+  left: 0.65rem;
+  right: 0.65rem;
+  bottom: 0.65rem;
+  z-index: 2;
+  overflow: hidden;
+  border-radius: 0.55rem;
+  background: rgba(248, 250, 252, 0.86);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+}
+
+.employee-card__identity {
+  padding: 0.7rem 0.75rem 0.45rem;
+}
+
+.employee-card__name {
+  margin: 0 0 0.1rem;
+  font-size: clamp(1.1rem, 4.5vw, 1.4rem);
+  font-weight: 750;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--card-ink);
+}
+
+.employee-card__title {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--card-navy);
+}
+
+.employee-card__stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin: 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.45);
+}
+
+.employee-card__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  padding: 0.45rem 0.7rem;
+  min-width: 0;
+  border-right: 1px solid rgba(148, 163, 184, 0.35);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.employee-card__stat:nth-child(2n) {
+  border-right: none;
+}
+
+.employee-card__stat:nth-last-child(-n + 2) {
+  border-bottom: none;
+}
+
+.employee-card__stat dt {
+  margin: 0;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--card-muted);
+}
+
+.employee-card__stat dd {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--card-ink);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.employee-card__footer {
+  padding: 0.35rem 0.7rem;
+  background: linear-gradient(90deg, var(--card-navy), var(--card-cyan));
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+@media (max-width: 380px) {
+  .employee-card {
+    width: 100%;
+    aspect-ratio: auto;
+    min-height: 28rem;
+  }
+
+  .employee-card__panel {
+    left: 0.5rem;
+    right: 0.5rem;
+    bottom: 0.5rem;
+  }
+
+  .employee-card__company {
+    font-size: 0.62rem;
+  }
+}
