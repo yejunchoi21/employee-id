@@ -1,13 +1,33 @@
-.employee-card {
+.employee-card-scene {
   --card-navy: #0f4c81;
   --card-cyan: #2aa4d8;
   --card-ink: #0f172a;
   --card-muted: #475569;
 
-  position: relative;
-  width: min(100%, 22rem);
-  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  margin: 0;
   aspect-ratio: 3 / 4;
+  perspective: 1400px;
+}
+
+.employee-card-flipper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.employee-card-flipper.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.employee-card {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   border-radius: 0.85rem;
   border: 2px solid #1e293b;
@@ -15,7 +35,23 @@
     0 16px 36px rgba(15, 35, 60, 0.28),
     0 1px 0 rgba(255, 255, 255, 0.2) inset;
   color: var(--card-ink);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   isolation: isolate;
+}
+
+.employee-card--front {
+  z-index: 1;
+  transform: rotateY(0deg);
+}
+
+.employee-card--back {
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  background:
+    linear-gradient(165deg, #f8fafc 0%, #e8f1f8 55%, #d9e8f4 100%);
+  transform: rotateY(180deg);
 }
 
 .employee-card__bg {
@@ -95,6 +131,11 @@
   padding: 0.7rem 0.75rem 0.45rem;
 }
 
+.employee-card__identity--back {
+  padding: 0 0 0.65rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.45);
+}
+
 .employee-card__name {
   margin: 0 0 0.1rem;
   font-size: clamp(1.1rem, 4.5vw, 1.4rem);
@@ -155,6 +196,98 @@
   overflow-wrap: anywhere;
 }
 
+.employee-card__actions {
+  padding: 0.55rem 0.7rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.45);
+}
+
+.employee-card__actions--stack {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.employee-card__hint {
+  margin: 0;
+  padding: 0.15rem 0;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: var(--card-muted);
+}
+
+.employee-card-scene {
+  cursor: pointer;
+}
+
+.employee-card__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0.15rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.employee-card__skills li {
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  background: #e8f1f8;
+  color: var(--card-navy);
+  font-size: 0.68rem;
+  font-weight: 650;
+}
+
+.employee-card__detail--skills dd {
+  font-weight: 500;
+}
+
+.employee-card__actions--back {
+  margin-top: auto;
+  padding: 0.75rem 0.9rem 0.9rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.45);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.employee-card__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 2.25rem;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--card-navy);
+  border-radius: 0.45rem;
+  background: var(--card-navy);
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.employee-card__button:hover {
+  background: #0c3d68;
+}
+
+.employee-card__button:focus-visible {
+  outline: 3px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+.employee-card__button--secondary {
+  background: #ffffff;
+  color: var(--card-navy);
+}
+
+.employee-card__button--secondary:hover {
+  background: #eef6fb;
+}
+
 .employee-card__footer {
   padding: 0.35rem 0.7rem;
   background: linear-gradient(90deg, var(--card-navy), var(--card-cyan));
@@ -166,13 +299,71 @@
   text-align: center;
 }
 
-@media (max-width: 380px) {
-  .employee-card {
-    width: 100%;
-    aspect-ratio: auto;
-    min-height: 28rem;
-  }
+.employee-card__back-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  padding: 0.85rem 0.9rem;
+  background: rgba(255, 255, 255, 0.72);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.4);
+}
 
+.employee-card__back-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0.85rem 0.9rem 0.5rem;
+  overflow: auto;
+}
+
+.employee-card__details {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0.75rem 0 0;
+}
+
+.employee-card__detail {
+  min-width: 0;
+}
+
+.employee-card__detail dt {
+  margin: 0 0 0.15rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--card-muted);
+}
+
+.employee-card__detail dd {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--card-ink);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.employee-card__detail a {
+  color: var(--card-navy);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.employee-card__detail a:focus-visible {
+  outline: 3px solid #38bdf8;
+  outline-offset: 2px;
+  border-radius: 0.15rem;
+}
+
+.employee-card__detail--bio dd {
+  font-weight: 500;
+  color: #334155;
+}
+
+@media (max-width: 380px) {
   .employee-card__panel {
     left: 0.5rem;
     right: 0.5rem;
@@ -181,5 +372,15 @@
 
   .employee-card__company {
     font-size: 0.62rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .employee-card-flipper {
+    transition: none;
+  }
+
+  .employee-card__button {
+    transition: none;
   }
 }

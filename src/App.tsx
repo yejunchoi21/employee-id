@@ -1,13 +1,21 @@
-import EmployeeCard from './components/EmployeeCard'
-import { employee } from './data/employee'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { EmployeeDirectoryProvider } from './context/EmployeeDirectoryProvider'
+import DirectoryPage from './pages/DirectoryPage'
+import SignupPage from './pages/SignupPage'
 import './App.css'
 
 function App() {
   return (
-    <main className="directory">
-      <h1 className="directory__heading">Employee Directory</h1>
-      <EmployeeCard employee={employee} />
-    </main>
+    <BrowserRouter>
+      <EmployeeDirectoryProvider>
+        <Routes>
+          <Route path="/" element={<Navigate to="/signup" replace />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/directory" element={<DirectoryPage />} />
+          <Route path="*" element={<Navigate to="/signup" replace />} />
+        </Routes>
+      </EmployeeDirectoryProvider>
+    </BrowserRouter>
   )
 }
 
