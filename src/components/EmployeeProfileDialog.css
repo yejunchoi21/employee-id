@@ -55,7 +55,16 @@
   line-height: 1.2;
 }
 
-.employee-profile__close {
+.employee-profile__header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: flex-end;
+}
+
+.employee-profile__close,
+.employee-profile__edit,
+.employee-profile__delete {
   min-height: 2.25rem;
   padding: 0.4rem 0.85rem;
   border: 1px solid var(--profile-navy);
@@ -68,11 +77,31 @@
   cursor: pointer;
 }
 
+.employee-profile__edit {
+  background: var(--profile-navy);
+  color: #ffffff;
+}
+
+.employee-profile__delete {
+  border-color: #b91c1c;
+  color: #b91c1c;
+}
+
 .employee-profile__close:hover {
   background: #eef6fb;
 }
 
+.employee-profile__edit:hover {
+  background: #0c3d68;
+}
+
+.employee-profile__delete:hover {
+  background: #fef2f2;
+}
+
 .employee-profile__close:focus-visible,
+.employee-profile__edit:focus-visible,
+.employee-profile__delete:focus-visible,
 .employee-profile a:focus-visible {
   outline: 3px solid #38bdf8;
   outline-offset: 2px;

@@ -3,12 +3,20 @@
   --card-cyan: #2aa4d8;
   --card-ink: #0f172a;
   --card-muted: #475569;
+  --card-accent: #f5c518;
+  --card-panel: rgba(255, 255, 255, 0.52);
+  --card-display: 'Bebas Neue', 'Arial Narrow', Impact, sans-serif;
+  --card-sans: 'Manrope', 'Segoe UI', sans-serif;
 
   width: 100%;
   height: 100%;
   margin: 0;
   aspect-ratio: 3 / 4;
   perspective: 1400px;
+  cursor: pointer;
+  font-family: var(--card-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
 }
 
 .employee-card-flipper {
@@ -29,11 +37,11 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border-radius: 0.85rem;
-  border: 2px solid #1e293b;
+  border-radius: 0.7rem;
+  border: 2px solid #0b1220;
   box-shadow:
-    0 16px 36px rgba(15, 35, 60, 0.28),
-    0 1px 0 rgba(255, 255, 255, 0.2) inset;
+    0 18px 40px rgba(8, 18, 32, 0.34),
+    0 1px 0 rgba(255, 255, 255, 0.16) inset;
   color: var(--card-ink);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
@@ -43,6 +51,7 @@
 .employee-card--front {
   z-index: 1;
   transform: rotateY(0deg);
+  color: var(--card-ink);
 }
 
 .employee-card--back {
@@ -65,70 +74,99 @@
   pointer-events: none;
 }
 
-.employee-card__header {
+.employee-card__vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(6, 18, 28, 0.12) 0%,
+      transparent 32%,
+      transparent 58%,
+      rgba(6, 18, 28, 0.18) 100%
+    );
+}
+
+.employee-card__role-tag {
   position: absolute;
   top: 0.7rem;
-  left: 0.7rem;
-  right: 0.7rem;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: fit-content;
-  max-width: calc(100% - 1.4rem);
-  padding: 0.35rem 0.55rem 0.35rem 0.35rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
-}
-
-.employee-card__logo {
-  display: grid;
-  place-items: center;
-  width: 1.4rem;
-  height: 1.4rem;
-  border-radius: 50%;
-  background: var(--card-navy);
-  color: #ffffff;
-  flex-shrink: 0;
-}
-
-.employee-card__logo-mark {
-  font-size: 0.7rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.employee-card__company {
+  left: 50%;
+  z-index: 3;
   margin: 0;
-  min-width: 0;
-  font-size: 0.68rem;
+  max-width: min(58%, 10.5rem);
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(8, 24, 36, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #e2e8f0;
+  font-size: 0.58rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-align: center;
   text-transform: uppercase;
-  color: var(--card-navy);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transform: translate3d(-50%, 0, 0);
+}
+
+.employee-card__power {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  min-width: 3.1rem;
+  padding: 0.35rem 0.45rem 0.3rem;
+  border-radius: 0.7rem;
+  background: linear-gradient(160deg, #0f4c81 0%, #0a355a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 8px 18px rgba(6, 18, 28, 0.35);
+  text-align: center;
+}
+
+.employee-card__power-value {
+  font-family: var(--card-display);
+  font-size: 1.35rem;
+  line-height: 0.9;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+}
+
+.employee-card__power-label {
+  margin-top: 0.1rem;
+  font-size: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(226, 232, 240, 0.85);
 }
 
 .employee-card__panel {
   position: absolute;
-  left: 0.65rem;
-  right: 0.65rem;
-  bottom: 0.65rem;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 2;
   overflow: hidden;
-  border-radius: 0.55rem;
-  background: rgba(248, 250, 252, 0.86);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 0;
+  background: var(--card-panel);
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.55);
+  /* No backdrop-filter — it softens the panel text when the card is small */
+  box-shadow: none;
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
 }
 
 .employee-card__identity {
-  padding: 0.7rem 0.75rem 0.45rem;
+  min-width: 0;
+  padding: 0.4rem 0.55rem 0.22rem;
 }
 
 .employee-card__identity--back {
@@ -137,19 +175,38 @@
 }
 
 .employee-card__name {
-  margin: 0 0 0.1rem;
-  font-size: clamp(1.1rem, 4.5vw, 1.4rem);
+  margin: 0 0 0.08rem;
+  font-family: var(--card-sans);
+  font-size: clamp(0.98rem, 3.6vw, 1.12rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: #000000;
+  -webkit-text-stroke: 0.35px rgba(255, 255, 255, 0.75);
+  paint-order: stroke fill;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.employee-card--back .employee-card__name {
+  font-family: var(--card-sans);
+  font-size: clamp(0.98rem, 3.8vw, 1.15rem);
   font-weight: 750;
-  line-height: 1.15;
   letter-spacing: -0.02em;
+  text-transform: none;
   color: var(--card-ink);
+  -webkit-text-stroke: 0;
+  text-shadow: none;
 }
 
 .employee-card__title {
   margin: 0;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--card-navy);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #041e36;
+  -webkit-text-stroke: 0.3px rgba(255, 255, 255, 0.7);
+  paint-order: stroke fill;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
 .employee-card__stats {
@@ -157,17 +214,17 @@
   grid-template-columns: 1fr 1fr;
   gap: 0;
   margin: 0;
-  border-top: 1px solid rgba(148, 163, 184, 0.45);
+  border-top: 1px solid rgba(15, 23, 42, 0.14);
 }
 
 .employee-card__stat {
   display: flex;
   flex-direction: column;
-  gap: 0.12rem;
-  padding: 0.45rem 0.7rem;
+  gap: 0.1rem;
+  padding: 0.28rem 0.5rem;
   min-width: 0;
-  border-right: 1px solid rgba(148, 163, 184, 0.35);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  border-right: 1px solid rgba(15, 23, 42, 0.1);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.1);
 }
 
 .employee-card__stat:nth-child(2n) {
@@ -181,42 +238,51 @@
 .employee-card__stat dt {
   margin: 0;
   font-size: 0.58rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--card-muted);
+  color: #0f172a;
+  -webkit-text-stroke: 0.25px rgba(255, 255, 255, 0.7);
+  paint-order: stroke fill;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
 .employee-card__stat dd {
   margin: 0;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--card-ink);
-  line-height: 1.2;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #000000;
+  line-height: 1.15;
   overflow-wrap: anywhere;
+  -webkit-text-stroke: 0.3px rgba(255, 255, 255, 0.7);
+  paint-order: stroke fill;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
 .employee-card__actions {
-  padding: 0.55rem 0.7rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.45);
+  padding: 0.2rem 0.42rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.32);
 }
 
 .employee-card__actions--stack {
   display: grid;
-  gap: 0.4rem;
+  gap: 0.28rem;
 }
 
-.employee-card__hint {
-  margin: 0;
-  padding: 0.15rem 0;
+.employee-card__footer {
+  padding: 0.16rem 0.42rem;
+  background: linear-gradient(
+    90deg,
+    rgba(15, 76, 129, 0.82),
+    rgba(42, 164, 216, 0.82)
+  );
+  color: #ffffff;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   text-align: center;
-  font-size: 0.75rem;
-  font-weight: 650;
-  color: var(--card-muted);
-}
-
-.employee-card-scene {
-  cursor: pointer;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .employee-card__skills {
@@ -253,16 +319,16 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 2.25rem;
-  padding: 0.45rem 0.85rem;
+  min-height: 1.7rem;
+  padding: 0.28rem 0.55rem;
   border: 1px solid var(--card-navy);
-  border-radius: 0.45rem;
+  border-radius: 0.35rem;
   background: var(--card-navy);
   color: #ffffff;
   font: inherit;
-  font-size: 0.82rem;
+  font-size: 0.66rem;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
   cursor: pointer;
   transition:
     background-color 0.2s ease,
@@ -288,15 +354,49 @@
   background: #eef6fb;
 }
 
-.employee-card__footer {
-  padding: 0.35rem 0.7rem;
-  background: linear-gradient(90deg, var(--card-navy), var(--card-cyan));
+.employee-card--back .employee-card__button {
+  min-height: 2.25rem;
+  font-size: 0.82rem;
+}
+
+.employee-card__button--danger {
+  background: #ffffff;
+  border-color: #b91c1c;
+  color: #b91c1c;
+}
+
+.employee-card__button--danger:hover {
+  background: #fef2f2;
+}
+
+.employee-card__logo {
+  display: grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: var(--card-navy);
   color: #ffffff;
+  flex-shrink: 0;
+}
+
+.employee-card__logo-mark {
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.employee-card__company {
+  margin: 0;
+  min-width: 0;
   font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  text-align: center;
+  color: var(--card-navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .employee-card__back-header {
@@ -365,13 +465,9 @@
 
 @media (max-width: 380px) {
   .employee-card__panel {
-    left: 0.5rem;
-    right: 0.5rem;
-    bottom: 0.5rem;
-  }
-
-  .employee-card__company {
-    font-size: 0.62rem;
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
 }
 

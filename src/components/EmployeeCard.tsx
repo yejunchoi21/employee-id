@@ -6,18 +6,29 @@ interface EmployeeCardProps {
   employee: Employee
   isSelected?: boolean
   isIsolated?: boolean
+  canEdit?: boolean
   onIsolate?: () => void
   onExitIsolate?: () => void
   onViewProfile?: (employee: Employee) => void
+  onEdit?: (employee: Employee) => void
+  onDelete?: (employee: Employee) => void
+}
+
+function idDigits(id: string) {
+  const match = id.match(/(\d+)/)
+  return match?.[1] ?? id.slice(-4)
 }
 
 function EmployeeCard({
   employee,
   isSelected = true,
   isIsolated = false,
+  canEdit = false,
   onIsolate,
   onExitIsolate,
   onViewProfile,
+  onEdit,
+  onDelete,
 }: EmployeeCardProps) {
   const [isFlipped, setIsFlipped] = useState(false)
   const cardId = useId()
@@ -35,6 +46,14 @@ function EmployeeCard({
 
   const handleViewProfile = () => {
     onViewProfile?.(employee)
+  }
+
+  const handleEdit = () => {
+    onEdit?.(employee)
+  }
+
+  const handleDelete = () => {
+    onDelete?.(employee)
   }
 
   const handleCardActivate = () => {
@@ -55,6 +74,8 @@ function EmployeeCard({
     if (target.closest('button, a, input, textarea, select')) return
     handleCardActivate()
   }
+
+  const badgeId = idDigits(employee.id)
 
   return (
     <div
@@ -78,13 +99,14 @@ function EmployeeCard({
             alt=""
             aria-hidden="true"
           />
+          <div className="employee-card__vignette" aria-hidden="true" />
 
-          <header className="employee-card__header">
-            <div className="employee-card__logo" aria-hidden="true">
-              <span className="employee-card__logo-mark">N</span>
-            </div>
-            <p className="employee-card__company">{employee.company}</p>
-          </header>
+          <p className="employee-card__role-tag">{employee.title}</p>
+
+          <div className="employee-card__power" aria-label={`Employee ID ${employee.id}`}>
+            <span className="employee-card__power-value">{badgeId}</span>
+            <span className="employee-card__power-label">ID</span>
+          </div>
 
           <div className="employee-card__panel">
             <div className="employee-card__identity">
@@ -111,32 +133,28 @@ function EmployeeCard({
               </div>
             </dl>
 
-            <div className="employee-card__actions employee-card__actions--stack">
-              {isIsolated ? (
-                <>
+            {isIsolated ? (
+              <div className="employee-card__actions employee-card__actions--stack">
+                <button
+                  type="button"
+                  className="employee-card__button"
+                  onClick={showDetails}
+                  aria-controls={backId}
+                  aria-expanded={showFlipped}
+                >
+                  Flip for more info
+                </button>
+                {onExitIsolate ? (
                   <button
                     type="button"
-                    className="employee-card__button"
-                    onClick={showDetails}
-                    aria-controls={backId}
-                    aria-expanded={showFlipped}
+                    className="employee-card__button employee-card__button--secondary"
+                    onClick={onExitIsolate}
                   >
-                    Flip for more info
+                    Back to rack
                   </button>
-                  {onExitIsolate ? (
-                    <button
-                      type="button"
-                      className="employee-card__button employee-card__button--secondary"
-                      onClick={onExitIsolate}
-                    >
-                      Back to rack
-                    </button>
-                  ) : null}
-                </>
-              ) : (
-                <p className="employee-card__hint">Click card to isolate</p>
-              )}
-            </div>
+                ) : null}
+              </div>
+            ) : null}
 
             <footer className="employee-card__footer">Employee</footer>
           </div>
@@ -223,6 +241,24 @@ function EmployeeCard({
             >
               View full profile
             </button>
+            {canEdit ? (
+              <>
+                <button
+                  type="button"
+                  className="employee-card__button employee-card__button--secondary"
+                  onClick={handleEdit}
+                >
+                  Edit my card
+                </button>
+                <button
+                  type="button"
+                  className="employee-card__button employee-card__button--danger"
+                  onClick={handleDelete}
+                >
+                  Delete card
+                </button>
+              </>
+            ) : null}
             {onExitIsolate ? (
               <button
                 type="button"

@@ -4,7 +4,10 @@ import './EmployeeProfileDialog.css'
 
 interface EmployeeProfileDialogProps {
   employee: Employee | null
+  canEdit?: boolean
   onClose: () => void
+  onEdit?: (employee: Employee) => void
+  onDelete?: (employee: Employee) => void
 }
 
 function phoneHref(phone: string) {
@@ -13,7 +16,10 @@ function phoneHref(phone: string) {
 
 function EmployeeProfileDialog({
   employee,
+  canEdit = false,
   onClose,
+  onEdit,
+  onDelete,
 }: EmployeeProfileDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -87,14 +93,41 @@ function EmployeeProfileDialog({
                 Employee profile
               </h2>
             </div>
-            <button
-              ref={closeButtonRef}
-              type="button"
-              className="employee-profile__close"
-              onClick={requestClose}
-            >
-              Close
-            </button>
+            <div className="employee-profile__header-actions">
+              {canEdit ? (
+                <>
+                  <button
+                    type="button"
+                    className="employee-profile__edit"
+                    onClick={() => {
+                      if (!employee) return
+                      requestClose()
+                      window.requestAnimationFrame(() => onEdit?.(employee))
+                    }}
+                  >
+                    Edit my card
+                  </button>
+                  <button
+                    type="button"
+                    className="employee-profile__delete"
+                    onClick={() => {
+                      if (!employee) return
+                      onDelete?.(employee)
+                    }}
+                  >
+                    Delete
+                  </button>
+                </>
+              ) : null}
+              <button
+                ref={closeButtonRef}
+                type="button"
+                className="employee-profile__close"
+                onClick={requestClose}
+              >
+                Close
+              </button>
+            </div>
           </header>
 
           <div className="employee-profile__content">

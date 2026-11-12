@@ -16,6 +16,9 @@ interface EmployeeCarouselProps {
   selectedEmployeeId: string
   onSelectedEmployeeIdChange: (employeeId: string) => void
   onViewProfile: (employee: Employee) => void
+  canEditEmployee?: (employeeId: string) => boolean
+  onEditEmployee?: (employee: Employee) => void
+  onDeleteEmployee?: (employee: Employee) => void
 }
 
 const DRAG_THRESHOLD_PX = 8
@@ -40,6 +43,9 @@ function EmployeeCarousel({
   selectedEmployeeId,
   onSelectedEmployeeIdChange,
   onViewProfile,
+  canEditEmployee,
+  onEditEmployee,
+  onDeleteEmployee,
 }: EmployeeCarouselProps) {
   const total = employees.length
   const step = total > 0 ? 360 / total : 0
@@ -429,7 +435,7 @@ function EmployeeCarousel({
                 style={{
                   transform: showAsIsolated
                     ? isSelected
-                      ? 'translate(-50%, -50%) scale(1.06)'
+                      ? 'translate3d(-50%, -50%, 0)'
                       : `rotateY(${angle}deg) translateZ(${radius}px)`
                     : `rotateY(${angle}deg) translateZ(${radius}px)`,
                 }}
@@ -443,6 +449,9 @@ function EmployeeCarousel({
                   onIsolate={isolateSelected}
                   onExitIsolate={isSingleResult ? undefined : exitIsolate}
                   onViewProfile={onViewProfile}
+                  canEdit={canEditEmployee?.(employee.id) ?? false}
+                  onEdit={onEditEmployee}
+                  onDelete={onDeleteEmployee}
                 />
               </div>
             )

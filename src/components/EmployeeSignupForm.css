@@ -1,40 +1,47 @@
 .signup {
   width: min(100% - 2rem, 56rem);
   margin: 0 auto 1.25rem;
-  padding: 1.1rem;
-  border: 1px solid #d7e2ec;
-  border-radius: 0.85rem;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+  padding: 1.35rem 1.25rem 1.25rem;
+  border: 1px solid rgba(15, 76, 129, 0.12);
+  border-radius: 1.1rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(246, 250, 253, 0.82));
+  box-shadow: 0 18px 40px rgba(15, 35, 60, 0.08);
   box-sizing: border-box;
 }
 
 .signup__intro {
-  margin-bottom: 0.95rem;
+  margin-bottom: 1.15rem;
+  padding-bottom: 0.95rem;
+  border-bottom: 1px solid rgba(15, 76, 129, 0.1);
 }
 
 .signup__title {
-  margin: 0 0 0.35rem;
-  font-size: 1.2rem;
-  font-weight: 750;
-  color: #0f172a;
+  margin: 0 0 0.4rem;
+  font-family: 'Bebas Neue', 'Arial Narrow', Impact, sans-serif;
+  font-size: clamp(1.55rem, 3vw, 1.85rem);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #0b1220;
 }
 
 .signup__copy {
   margin: 0;
   color: #475569;
-  line-height: 1.45;
+  font-weight: 600;
+  line-height: 1.5;
 }
 
 .signup__form {
   display: grid;
-  gap: 0.9rem;
+  gap: 0.95rem;
 }
 
 .signup__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
+  gap: 0.8rem;
 }
 
 .signup__field {
@@ -49,9 +56,9 @@
 }
 
 .signup__field label {
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #475569;
 }
@@ -59,20 +66,27 @@
 .signup__field input,
 .signup__field textarea {
   width: 100%;
-  min-height: 2.5rem;
-  padding: 0.55rem 0.75rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.5rem;
-  background: #ffffff;
-  color: #0f172a;
+  min-height: 2.55rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  border-radius: 0.65rem;
+  background: rgba(255, 255, 255, 0.94);
+  color: #0b1220;
   font: inherit;
   font-size: 0.95rem;
+  font-weight: 600;
   box-sizing: border-box;
+  transition: border-color 0.2s ease;
 }
 
 .signup__field textarea {
   min-height: 6.5rem;
   resize: vertical;
+}
+
+.signup__field input:hover,
+.signup__field textarea:hover {
+  border-color: rgba(15, 76, 129, 0.35);
 }
 
 .signup__field input:focus-visible,
@@ -86,12 +100,13 @@
 .signup__error {
   margin: 0;
   font-size: 0.86rem;
+  font-weight: 600;
   color: #64748b;
 }
 
 .signup__error {
   color: #b91c1c;
-  font-weight: 650;
+  font-weight: 700;
 }
 
 .signup__submit:disabled {
@@ -105,23 +120,28 @@
   justify-content: space-between;
   gap: 0.85rem;
   flex-wrap: wrap;
+  padding-top: 0.35rem;
 }
 
 .signup__submit {
-  min-height: 2.5rem;
-  padding: 0.55rem 1rem;
+  min-height: 2.6rem;
+  padding: 0.55rem 1.15rem;
   border: 1px solid #0f4c81;
-  border-radius: 0.5rem;
+  border-radius: 999px;
   background: #0f4c81;
   color: #ffffff;
   font: inherit;
-  font-size: 0.92rem;
-  font-weight: 700;
+  font-size: 0.95rem;
+  font-weight: 750;
   cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
-.signup__submit:hover {
+.signup__submit:hover:not(:disabled) {
   background: #0c3d68;
+  transform: translateY(-1px);
 }
 
 @media (max-width: 720px) {
@@ -135,5 +155,17 @@
 
   .signup__submit {
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signup__field input,
+  .signup__field textarea,
+  .signup__submit {
+    transition: none;
+  }
+
+  .signup__submit:hover:not(:disabled) {
+    transform: none;
   }
 }

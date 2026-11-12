@@ -13,8 +13,8 @@ function SignupPage() {
     headingRef.current?.focus()
   }, [])
 
-  const handleSubmit = (input: EmployeeSignupInput) => {
-    const result = createEmployee(input)
+  const handleSubmit = async (input: EmployeeSignupInput) => {
+    const result = await createEmployee(input)
     if (!result.ok) {
       return result
     }
@@ -28,22 +28,23 @@ function SignupPage() {
   }
 
   return (
-    <main className="directory">
-      <h1
-        ref={headingRef}
-        className="directory__heading"
-        tabIndex={-1}
-      >
-        Create your employee card
-      </h1>
+    <main className="page">
+      <div className="page__hero">
+        <p className="page__kicker">New hire badge</p>
+        <h1 ref={headingRef} className="page__heading" tabIndex={-1}>
+          Create your employee card
+        </h1>
+        <p className="page__lede">
+          Fill in your details, upload a portrait, and drop your badge onto the
+          Northline rack.
+        </p>
+      </div>
 
       <EmployeeSignupForm onSubmit={handleSubmit} submitLabel="Create my card" />
 
-      <p className="directory__nav">
-        Already have a card?{' '}
-        <Link className="directory__link" to="/directory">
-          Open the directory
-        </Link>
+      <p className="page__footer-note">
+        Already on the roster?{' '}
+        <Link to="/directory">Open the directory</Link>
       </p>
     </main>
   )

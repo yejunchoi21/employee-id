@@ -3,9 +3,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import DirectoryControls from '../components/DirectoryControls'
 import DirectoryEmptyState from '../components/DirectoryEmptyState'
 import EmployeeCarousel from '../components/EmployeeCarousel'
+import EmployeeEditDialog from '../components/EmployeeEditDialog'
 import EmployeeProfileDialog from '../components/EmployeeProfileDialog'
 import { useEmployeeDirectory } from '../hooks/useEmployeeDirectory'
 import type { Employee } from '../data/employee'
+import type { EmployeeSignupInput } from '../utils/createEmployee'
 
 interface DirectoryLocationState {
   focusEmployeeId?: string
@@ -19,6 +21,7 @@ function DirectoryPage() {
   const [profileEmployeeId, setProfileEmployeeId] = useState<string | null>(
     null,
   )
+  const [editEmployeeId, setEditEmployeeId] = useState<string | null>(null)
 
   const {
     allEmployees,
@@ -33,6 +36,9 @@ function DirectoryPage() {
     setSelectedEmployeeId,
     clearFilters,
     getVisibleEmployees,
+    isOwnedEmployee,
+    updateEmployee,
+    deleteEmployee,
   } = useEmployeeDirectory()
 
   const locationState = (location.state as DirectoryLocationState | null) ?? null
@@ -75,6 +81,12 @@ function DirectoryPage() {
 
   const profileEmployee =
     allEmployees.find((employee) => employee.id === profileEmployeeId) ?? null
+  const editEmployee =
+    allEmployees.find((employee) => employee.id === editEmployeeId) ?? null
+
+  const hasAnyEmployees = allEmployees.length > 0
+  const filtersActive =
+    search.trim().length > 0 || department !== 'all' || sort !== 'asc'
 
   const handleViewProfile = useCallback((employee: Employee) => {
     profileTriggerRef.current = document.activeElement as HTMLElement | null
@@ -89,19 +101,79 @@ function DirectoryPage() {
     })
   }, [])
 
+  const handleEditEmployee = useCallback((employee: Employee) => {
+    if (!isOwnedEmployee(employee.id)) return
+    setProfileEmployeeId(null)
+    setEditEmployeeId(employee.id)
+  }, [isOwnedEmployee])
+
+  const handleEditClose = useCallback(() => {
+    setEditEmployeeId(null)
+  }, [])
+
+  const handleEditSave = useCallback(
+    async (employeeId: string, input: EmployeeSignupInput) => {
+      const result = await updateEmployee(employeeId, input)
+      if (!result.ok) {
+        return result
+      }
+      return { ok: true as const }
+    },
+    [updateEmployee],
+  )
+
+  const handleDeleteEmployee = useCallback(
+    async (employee: Employee) => {
+      if (!isOwnedEmployee(employee.id)) return
+
+      const confirmed = window.confirm(
+        `Delete ${employee.name}'s card? This cannot be undone.`,
+      )
+      if (!confirmed) return
+
+      const result = await deleteEmployee(employee.id)
+      if (!result.ok) {
+        window.alert(result.error)
+        return
+      }
+
+      setProfileEmployeeId(null)
+      setEditEmployeeId(null)
+    },
+    [deleteEmployee, isOwnedEmployee],
+  )
+
+  const handleEditDelete = useCallback(
+    async (employee: Employee) => {
+      if (!isOwnedEmployee(employee.id)) return
+
+      const result = await deleteEmployee(employee.id)
+      if (!result.ok) {
+        throw new Error(result.error)
+      }
+
+      setProfileEmployeeId(null)
+      setEditEmployeeId(null)
+    },
+    [deleteEmployee, isOwnedEmployee],
+  )
+
   return (
-    <main className="directory">
-      <div className="directory__top">
-        <h1
-          ref={headingRef}
-          className="directory__heading"
-          tabIndex={-1}
-        >
+    <main className="page">
+      <div className="page__hero">
+        <p className="page__kicker">Staff roster</p>
+        <h1 ref={headingRef} className="page__heading" tabIndex={-1}>
           Employee Directory
         </h1>
-        <Link className="directory__add-link" to="/signup">
-          Add employee
-        </Link>
+        <p className="page__lede">
+          Browse the Northline coat rack, isolate a card for details, and keep
+          your own badge up to date.
+        </p>
+        <div className="page__actions">
+          <Link className="page__button" to="/signup">
+            Add employee
+          </Link>
+        </div>
       </div>
 
       <DirectoryControls
@@ -118,7 +190,11 @@ function DirectoryPage() {
 
       <div id="employee-rack">
         {visibleEmployees.length === 0 ? (
-          <DirectoryEmptyState onClear={clearFilters} />
+          <DirectoryEmptyState
+            hasAnyEmployees={hasAnyEmployees}
+            filtersActive={filtersActive}
+            onClear={clearFilters}
+          />
         ) : (
           <EmployeeCarousel
             key={visibleIdsKey}
@@ -126,13 +202,32 @@ function DirectoryPage() {
             selectedEmployeeId={nextSelectedId || visibleEmployees[0].id}
             onSelectedEmployeeIdChange={setSelectedEmployeeId}
             onViewProfile={handleViewProfile}
+            canEditEmployee={isOwnedEmployee}
+            onEditEmployee={handleEditEmployee}
+            onDeleteEmployee={(employee) => {
+              void handleDeleteEmployee(employee)
+            }}
           />
         )}
       </div>
 
       <EmployeeProfileDialog
         employee={profileEmployee}
+        canEdit={
+          profileEmployee ? isOwnedEmployee(profileEmployee.id) : false
+        }
         onClose={handleProfileClose}
+        onEdit={handleEditEmployee}
+        onDelete={(employee) => {
+          void handleDeleteEmployee(employee)
+        }}
+      />
+
+      <EmployeeEditDialog
+        employee={editEmployee}
+        onClose={handleEditClose}
+        onSave={handleEditSave}
+        onDelete={handleEditDelete}
       />
     </main>
   )

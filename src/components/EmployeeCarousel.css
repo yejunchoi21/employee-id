@@ -8,28 +8,30 @@
 }
 
 .employee-carousel__hint {
-  margin: 0 1rem 0.35rem;
+  margin: 0 1rem 0.55rem;
   text-align: center;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #0f4c81;
 }
 
 .employee-carousel__counter {
-  margin: 0.35rem 0 0;
+  margin: 0.55rem 0 0;
   text-align: center;
   font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: #334155;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #0b1220;
 }
 
 .employee-carousel__stage {
   position: relative;
-  height: min(36rem, 78vh);
+  height: min(42rem, 86vh);
   margin: 0 auto;
   perspective: 1600px;
-  perspective-origin: 50% 45%;
+  perspective-origin: 50% 50%;
   touch-action: none;
   cursor: grab;
   outline: none;
@@ -73,18 +75,16 @@
   width: var(--carousel-card-width);
   transform-style: preserve-3d;
   margin-left: calc(var(--carousel-card-width) / -2);
-  margin-top: calc(var(--carousel-card-width) * -0.72);
+  /* Half of 3:4 card height so the full card sits inside the stage */
+  margin-top: calc(var(--carousel-card-width) * -2 / 3);
   opacity: 0.55;
-  filter: brightness(0.92);
-  transition:
-    opacity 0.25s ease,
-    filter 0.25s ease;
+  /* Avoid CSS filter — it softens text when cards are small */
+  transition: opacity 0.25s ease;
   pointer-events: none;
 }
 
 .employee-carousel__item.is-selected {
   opacity: 1;
-  filter: none;
   z-index: 2;
   pointer-events: auto;
 }
@@ -104,7 +104,6 @@
 .employee-carousel--isolated .employee-carousel__item.is-selected {
   margin: 0;
   opacity: 1;
-  filter: none;
   pointer-events: auto;
   z-index: 3;
 }
@@ -115,13 +114,32 @@
   visibility: hidden;
 }
 
+.employee-carousel--isolated {
+  --carousel-card-width: min(24rem, 88vw);
+}
+
+.employee-carousel--isolated .employee-carousel__stage,
+.employee-carousel__stage.is-isolated {
+  height: min(48rem, 92vh);
+}
+
 .employee-carousel--isolated .employee-carousel__item.is-selected {
   margin-left: 0;
   margin-top: 0;
+  width: var(--carousel-card-width);
 }
 
 .employee-carousel__item .employee-card-scene {
   box-shadow: 0 18px 40px rgba(15, 35, 60, 0.22);
+}
+
+/* Keep selected / isolated text on a crisp paint layer */
+.employee-carousel__item.is-selected .employee-card-scene,
+.employee-carousel--isolated .employee-carousel__item.is-selected .employee-card-scene {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .visually-hidden {
@@ -142,7 +160,16 @@
   }
 
   .employee-carousel__stage {
-    height: min(34rem, 72vh);
+    height: min(38rem, 80vh);
+  }
+
+  .employee-carousel--isolated {
+    --carousel-card-width: min(21rem, 92vw);
+  }
+
+  .employee-carousel--isolated .employee-carousel__stage,
+  .employee-carousel__stage.is-isolated {
+    height: min(44rem, 90vh);
   }
 }
 

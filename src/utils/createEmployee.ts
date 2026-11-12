@@ -1,5 +1,4 @@
-import portraitPlaceholder from '../assets/portrait-placeholder.svg'
-import type { Employee } from '../data/employee'
+import { portraitPlaceholder, type Employee } from '../data/employee'
 
 export interface EmployeeSignupInput {
   name: string
@@ -11,6 +10,12 @@ export interface EmployeeSignupInput {
   manager: string
   bio: string
   skills: string
+  portraitId?: string
+  photoUrl?: string
+  /** Processed portrait blob kept only in memory until IndexedDB save. */
+  portraitBlob?: Blob | null
+  /** When editing, clear the saved custom portrait and use the placeholder. */
+  removePortrait?: boolean
 }
 
 function trimField(value: string) {
@@ -58,7 +63,7 @@ export function createEmployeeFromSignup(
     }
   }
 
-  return {
+  const employee: Employee = {
     id: `EMP-${nextNumber}`,
     name,
     title: trimField(input.title),
@@ -67,11 +72,51 @@ export function createEmployeeFromSignup(
     initials: getInitials(name),
     office: trimField(input.office),
     joined,
-    photoUrl: portraitPlaceholder,
+    photoUrl: input.photoUrl || portraitPlaceholder,
     email: trimField(input.email),
     phone: trimField(input.phone),
     manager: trimField(input.manager),
     bio: trimField(input.bio),
     skills: parseSkills(input.skills),
   }
+
+  if (input.portraitId) {
+    employee.portraitId = input.portraitId
+  }
+
+  return employee
+}
+
+export function applyEmployeeUpdate(
+  existing: Employee,
+  input: EmployeeSignupInput,
+): Employee {
+  const name = trimField(input.name)
+  const updated: Employee = {
+    ...existing,
+    name,
+    title: trimField(input.title),
+    department: trimField(input.department),
+    initials: getInitials(name),
+    office: trimField(input.office),
+    email: trimField(input.email),
+    phone: trimField(input.phone),
+    manager: trimField(input.manager),
+    bio: trimField(input.bio),
+    skills: parseSkills(input.skills),
+  }
+
+  if (input.removePortrait) {
+    delete updated.portraitId
+    updated.photoUrl = portraitPlaceholder
+    return updated
+  }
+
+  if (input.portraitBlob && input.portraitId) {
+    updated.portraitId = input.portraitId
+    updated.photoUrl = input.photoUrl || existing.photoUrl
+    return updated
+  }
+
+  return updated
 }

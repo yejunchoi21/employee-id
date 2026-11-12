@@ -1,11 +1,15 @@
-import { useId, useState, type FormEvent } from 'react'
+import { useEffect, useId, useState, type FormEvent } from 'react'
 import type { EmployeeSignupInput } from '../utils/createEmployee'
+import PortraitUploadField from './PortraitUploadField'
 import './EmployeeSignupForm.css'
 
 interface EmployeeSignupFormProps {
   onSubmit: (
     input: EmployeeSignupInput,
-  ) => { ok: true } | { ok: false; error: string }
+  ) =>
+    | { ok: true }
+    | { ok: false; error: string }
+    | Promise<{ ok: true } | { ok: false; error: string }>
   submitLabel?: string
 }
 
@@ -29,6 +33,19 @@ function EmployeeSignupForm({
   const [form, setForm] = useState<EmployeeSignupInput>(emptyForm)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isProcessingPortrait, setIsProcessingPortrait] = useState(false)
+  const [portraitBlob, setPortraitBlob] = useState<Blob | null>(null)
+  const [portraitPreviewUrl, setPortraitPreviewUrl] = useState<string | null>(
+    null,
+  )
+
+  useEffect(() => {
+    return () => {
+      if (portraitPreviewUrl) {
+        URL.revokeObjectURL(portraitPreviewUrl)
+      }
+    }
+  }, [portraitPreviewUrl])
 
   const updateField = <K extends keyof EmployeeSignupInput>(
     key: K,
@@ -38,26 +55,33 @@ function EmployeeSignupForm({
     setError(null)
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (isSubmitting) return
+    if (isSubmitting || isProcessingPortrait) return
 
     setIsSubmitting(true)
     setError(null)
 
     try {
-      const result = onSubmit(form)
+      const portraitId = portraitBlob ? crypto.randomUUID() : undefined
+      const result = await onSubmit({
+        ...form,
+        portraitId,
+        photoUrl: portraitPreviewUrl || undefined,
+        portraitBlob,
+      })
+
       if (!result.ok) {
         setError(result.error)
-        return
       }
-      // Successful navigations leave this page; keep values until then.
     } catch {
       setError('Something went wrong while creating your card. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
   }
+
+  const busy = isSubmitting || isProcessingPortrait
 
   return (
     <section className="signup" aria-labelledby={`${formId}-title`}>
@@ -71,7 +95,21 @@ function EmployeeSignupForm({
         </p>
       </div>
 
-      <form className="signup__form" onSubmit={handleSubmit}>
+      <form className="signup__form" onSubmit={(event) => void handleSubmit(event)}>
+        <div className="signup__field signup__field--full">
+          <PortraitUploadField
+            portraitBlob={portraitBlob}
+            previewUrl={portraitPreviewUrl}
+            disabled={isSubmitting}
+            onProcessingChange={setIsProcessingPortrait}
+            onPortraitChange={({ blob, previewUrl }) => {
+              setPortraitBlob(blob)
+              setPortraitPreviewUrl(previewUrl)
+              setError(null)
+            }}
+          />
+        </div>
+
         <div className="signup__grid">
           <div className="signup__field">
             <label htmlFor={`${formId}-name`}>Full name</label>
@@ -82,6 +120,7 @@ function EmployeeSignupForm({
               required
               autoComplete="name"
               value={form.name}
+              disabled={busy}
               onChange={(event) => updateField('name', event.target.value)}
             />
           </div>
@@ -94,6 +133,7 @@ function EmployeeSignupForm({
               type="text"
               required
               value={form.title}
+              disabled={busy}
               onChange={(event) => updateField('title', event.target.value)}
             />
           </div>
@@ -107,6 +147,7 @@ function EmployeeSignupForm({
               required
               list={`${formId}-departments`}
               value={form.department}
+              disabled={busy}
               onChange={(event) => updateField('department', event.target.value)}
             />
             <datalist id={`${formId}-departments`}>
@@ -129,6 +170,7 @@ function EmployeeSignupForm({
               type="text"
               required
               value={form.office}
+              disabled={busy}
               onChange={(event) => updateField('office', event.target.value)}
             />
           </div>
@@ -142,6 +184,7 @@ function EmployeeSignupForm({
               required
               autoComplete="email"
               value={form.email}
+              disabled={busy}
               onChange={(event) => updateField('email', event.target.value)}
             />
           </div>
@@ -155,6 +198,7 @@ function EmployeeSignupForm({
               required
               autoComplete="tel"
               value={form.phone}
+              disabled={busy}
               onChange={(event) => updateField('phone', event.target.value)}
             />
           </div>
@@ -167,6 +211,7 @@ function EmployeeSignupForm({
               type="text"
               required
               value={form.manager}
+              disabled={busy}
               onChange={(event) => updateField('manager', event.target.value)}
             />
           </div>
@@ -180,6 +225,7 @@ function EmployeeSignupForm({
               required
               placeholder="Design systems, React, Writing"
               value={form.skills}
+              disabled={busy}
               onChange={(event) => updateField('skills', event.target.value)}
             />
             <p className="signup__help">Separate skills with commas.</p>
@@ -194,6 +240,7 @@ function EmployeeSignupForm({
             required
             rows={4}
             value={form.bio}
+            disabled={busy}
             onChange={(event) => updateField('bio', event.target.value)}
           />
         </div>
@@ -208,12 +255,12 @@ function EmployeeSignupForm({
               Browser-only demo. No password, accounts, or database are used.
             </p>
           )}
-          <button
-            type="submit"
-            className="signup__submit"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Creating…' : submitLabel}
+          <button type="submit" className="signup__submit" disabled={busy}>
+            {isProcessingPortrait
+              ? 'Processing photo…'
+              : isSubmitting
+                ? 'Creating…'
+                : submitLabel}
           </button>
         </div>
       </form>

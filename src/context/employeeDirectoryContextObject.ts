@@ -23,13 +23,20 @@ export interface EmployeeDirectoryContextValue {
   department: string
   sort: SortOrder
   selectedEmployeeId: string
+  isDirectoryReady: boolean
   setSearch: (value: string) => void
   setDepartment: (value: string) => void
   setSort: (value: SortOrder) => void
   setSelectedEmployeeId: (value: string) => void
   clearFilters: () => void
   getVisibleEmployees: () => Employee[]
-  createEmployee: (input: EmployeeSignupInput) => CreateResult
+  isOwnedEmployee: (employeeId: string) => boolean
+  createEmployee: (input: EmployeeSignupInput) => Promise<CreateResult>
+  updateEmployee: (
+    employeeId: string,
+    input: EmployeeSignupInput,
+  ) => Promise<CreateResult>
+  deleteEmployee: (employeeId: string) => Promise<CreateResult>
 }
 
 export const EmployeeDirectoryContext =

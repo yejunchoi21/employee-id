@@ -1,37 +1,56 @@
 .directory-empty {
-  width: min(100% - 2rem, 32rem);
-  margin: 1.5rem auto 0;
-  padding: 2rem 1.25rem;
+  width: min(100% - 2rem, 34rem);
+  margin: 1.75rem auto 0;
+  padding: 2.25rem 1.4rem;
   text-align: center;
-  border: 1px dashed #cbd5e1;
-  border-radius: 0.85rem;
-  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(15, 76, 129, 0.14);
+  border-radius: 1rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(244, 248, 252, 0.7));
+  box-shadow: 0 16px 36px rgba(15, 35, 60, 0.08);
   box-sizing: border-box;
 }
 
+.directory-empty__eyebrow {
+  margin: 0 0 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #0f4c81;
+}
+
 .directory-empty__title {
-  margin: 0 0 0.5rem;
-  font-size: 1.25rem;
-  font-weight: 750;
-  color: #0f172a;
+  margin: 0 0 0.55rem;
+  font-family: 'Bebas Neue', 'Arial Narrow', Impact, sans-serif;
+  font-size: clamp(1.7rem, 4vw, 2.1rem);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #0b1220;
 }
 
 .directory-empty__message {
-  margin: 0 0 1.1rem;
+  margin: 0 0 1.2rem;
   color: #475569;
-  line-height: 1.45;
+  font-weight: 600;
+  line-height: 1.5;
 }
 
 .directory-empty__clear {
-  min-height: 2.4rem;
-  padding: 0.45rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0.45rem 1.1rem;
   border: 1px solid #0f4c81;
-  border-radius: 0.5rem;
+  border-radius: 999px;
   background: #0f4c81;
   color: #ffffff;
   font: inherit;
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: 0.92rem;
+  font-weight: 750;
+  text-decoration: none;
   cursor: pointer;
 }
 
