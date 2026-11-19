@@ -7,9 +7,11 @@ import './EmployeeProfileDialog.css'
 interface EmployeeProfileDialogProps {
   employee: Employee | null
   canEdit?: boolean
+  canRequestHelp?: boolean
   onClose: () => void
   onEdit?: (employee: Employee) => void
   onDelete?: (employee: Employee) => void
+  onRequestHelp?: (employee: Employee) => void
 }
 
 function phoneHref(phone: string) {
@@ -35,9 +37,11 @@ function DetailRow({
 function EmployeeProfileDialog({
   employee,
   canEdit = false,
+  canRequestHelp = false,
   onClose,
   onEdit,
   onDelete,
+  onRequestHelp,
 }: EmployeeProfileDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -135,6 +139,18 @@ function EmployeeProfileDialog({
               ) : null}
             </div>
             <div className="employee-profile__header-actions">
+              {canRequestHelp ? (
+                <button
+                  type="button"
+                  className="employee-profile__help"
+                  onClick={() => {
+                    if (!employee) return
+                    onRequestHelp?.(employee)
+                  }}
+                >
+                  Request help
+                </button>
+              ) : null}
               {canEdit ? (
                 <>
                   <button

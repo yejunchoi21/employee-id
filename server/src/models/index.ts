@@ -12,3 +12,11 @@ export {
   type EmployeeApprovalStatus,
   type EmployeeDocument,
 } from './Employee.js'
+export {
+  HelpRequest,
+  helpRequestPriorities,
+  helpRequestStatuses,
+  type HelpRequestDocument,
+  type HelpRequestPriority,
+  type HelpRequestStatus,
+} from './HelpRequest.js'

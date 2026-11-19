@@ -3,6 +3,7 @@ import {
   employees as seedEmployees,
   portraitPlaceholder,
 } from '../data/employee'
+import { useAuth } from '../hooks/useAuth'
 import { useCustomEmployees, type SaveResult } from '../hooks/useCustomEmployees'
 import {
   applyEmployeeUpdate,
@@ -14,6 +15,7 @@ import {
   getDepartments,
   type SortOrder,
 } from '../utils/employeeFilters'
+import { mergeLocalAndPublishedEmployees } from '../utils/publishedEmployees'
 import {
   EmployeeDirectoryContext,
   type CreateResult,
@@ -24,6 +26,7 @@ export function EmployeeDirectoryProvider({
 }: {
   children: ReactNode
 }) {
+  const { publishedEmployees, departmentNamesById } = useAuth()
   const {
     customEmployees,
     addCustomEmployee,
@@ -39,8 +42,13 @@ export function EmployeeDirectoryProvider({
   )
 
   const allEmployees = useMemo(
-    () => [...seedEmployees, ...customEmployees],
-    [customEmployees],
+    () =>
+      mergeLocalAndPublishedEmployees(
+        [...seedEmployees, ...customEmployees],
+        publishedEmployees,
+        departmentNamesById,
+      ),
+    [customEmployees, departmentNamesById, publishedEmployees],
   )
 
   const departments = useMemo(

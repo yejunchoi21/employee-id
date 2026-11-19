@@ -7,6 +7,8 @@ import EmployeeEditDialog from '../components/EmployeeEditDialog'
 import EmployeeGrid from '../components/EmployeeGrid'
 import EmployeeList from '../components/EmployeeList'
 import EmployeeProfileDialog from '../components/EmployeeProfileDialog'
+import RequestHelpDialog from '../components/RequestHelpDialog'
+import { useAuth } from '../hooks/useAuth'
 import { useEmployeeDirectory } from '../hooks/useEmployeeDirectory'
 import type { Employee } from '../data/employee'
 import type { EmployeeSignupInput } from '../utils/createEmployee'
@@ -37,7 +39,9 @@ function DirectoryPage() {
     null,
   )
   const [editEmployeeId, setEditEmployeeId] = useState<string | null>(null)
+  const [helpEmployeeId, setHelpEmployeeId] = useState<string | null>(null)
   const [view, setView] = useState<DirectoryViewMode>(() => readStoredView())
+  const { membership, refreshOpenIncomingCount } = useAuth()
 
   const {
     allEmployees,
@@ -99,6 +103,15 @@ function DirectoryPage() {
     allEmployees.find((employee) => employee.id === profileEmployeeId) ?? null
   const editEmployee =
     allEmployees.find((employee) => employee.id === editEmployeeId) ?? null
+  const helpEmployee =
+    allEmployees.find((employee) => employee.id === helpEmployeeId) ?? null
+
+  const canRequestHelp = Boolean(
+    membership &&
+      profileEmployee?.serverEmployeeId &&
+      profileEmployee.email.trim().toLowerCase() !==
+        membership.email.trim().toLowerCase(),
+  )
 
   const hasAnyEmployees = allEmployees.length > 0
   const filtersActive =
@@ -184,6 +197,14 @@ function DirectoryPage() {
     [deleteEmployee, isOwnedEmployee],
   )
 
+  const handleRequestHelp = useCallback((employee: Employee) => {
+    setHelpEmployeeId(employee.id)
+  }, [])
+
+  const handleHelpClose = useCallback(() => {
+    setHelpEmployeeId(null)
+  }, [])
+
   return (
     <main className="page">
       <div className="page__hero">
@@ -260,10 +281,21 @@ function DirectoryPage() {
         canEdit={
           profileEmployee ? isOwnedEmployee(profileEmployee.id) : false
         }
+        canRequestHelp={canRequestHelp}
         onClose={handleProfileClose}
         onEdit={handleEditEmployee}
         onDelete={(employee) => {
           void handleDeleteEmployee(employee)
+        }}
+        onRequestHelp={handleRequestHelp}
+      />
+
+      <RequestHelpDialog
+        employee={helpEmployee}
+        recipientEmployeeId={helpEmployee?.serverEmployeeId ?? null}
+        onClose={handleHelpClose}
+        onCreated={() => {
+          void refreshOpenIncomingCount()
         }}
       />
 

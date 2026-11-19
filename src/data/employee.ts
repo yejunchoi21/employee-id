@@ -26,6 +26,8 @@ export interface Employee {
   askMeAbout?: string
   /** Fictional demo roster entry — never overwrite user-saved cards. */
   isDemo?: boolean
+  /** Mongo employee id used for help-request recipient targeting. */
+  serverEmployeeId?: string
 }
 
 const company = 'Northline Collective'

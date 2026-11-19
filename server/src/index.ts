@@ -7,6 +7,7 @@ import { authRouter } from './routes/auth.js'
 import { departmentsRouter } from './routes/departments.js'
 import { employeesRouter } from './routes/employees.js'
 import { healthRouter } from './routes/health.js'
+import { helpRequestsRouter } from './routes/helpRequests.js'
 import { metaRouter } from './routes/meta.js'
 
 async function main() {
@@ -26,6 +27,7 @@ async function main() {
   app.use(authRouter)
   app.use(departmentsRouter)
   app.use(employeesRouter)
+  app.use(helpRequestsRouter)
 
   app.use(
     (
