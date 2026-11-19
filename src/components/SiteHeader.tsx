@@ -69,6 +69,18 @@ function SiteHeader() {
               </span>
             ) : null}
           </NavLink>
+          {membership?.role === 'admin' ? (
+            <NavLink
+              to="/admin/accounts"
+              className={({ isActive }) =>
+                ['site-header__link', isActive ? 'is-active' : '']
+                  .filter(Boolean)
+                  .join(' ')
+              }
+            >
+              Create account
+            </NavLink>
+          ) : null}
           <NavLink
             to="/signup"
             className={({ isActive }) =>

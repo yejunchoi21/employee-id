@@ -4,6 +4,7 @@ import { Types } from 'mongoose'
 import { env } from '../config/env.js'
 import type { MembershipRole } from '../models/Membership.js'
 import type { AuthenticatedMembership } from '../types/express.js'
+import { presentMembership } from '../utils/membershipPresenters.js'
 
 interface SessionClaims {
   membershipId: string
@@ -34,7 +35,10 @@ export async function createSessionToken(
 
 export async function verifySessionToken(
   token: string,
-): Promise<AuthenticatedMembership | null> {
+): Promise<Omit<
+  AuthenticatedMembership,
+  'employeeId' | 'mustChangePassword'
+> | null> {
   try {
     const { payload } = await jwtVerify(token, secret)
     const membershipId = String(payload.membershipId ?? '')
@@ -85,11 +89,13 @@ export function clearSessionCookie(res: Response) {
 }
 
 export function toPublicMembership(membership: AuthenticatedMembership) {
-  return {
-    membershipId: String(membership.membershipId),
-    companyId: String(membership.companyId),
+  return presentMembership({
+    _id: membership.membershipId,
+    companyId: membership.companyId,
     email: membership.email,
     displayName: membership.displayName,
     role: membership.role,
-  }
+    employeeId: membership.employeeId,
+    mustChangePassword: membership.mustChangePassword,
+  })
 }

@@ -1,6 +1,10 @@
 import { Router } from 'express'
 import { Types } from 'mongoose'
-import { requireAdmin, requireAuth } from '../middleware/requireAuth.js'
+import {
+  requireAdmin,
+  requireAuth,
+  requireFreshPassword,
+} from '../middleware/requireAuth.js'
 import { Employee } from '../models/index.js'
 import {
   assertDepartmentInCompany,
@@ -19,6 +23,7 @@ export const employeesRouter = Router()
 employeesRouter.post(
   '/api/employees/submissions',
   requireAuth,
+  requireFreshPassword,
   async (req, res, next) => {
     try {
       const membership = req.membership!
@@ -121,6 +126,7 @@ employeesRouter.post(
 employeesRouter.get(
   '/api/employees/submissions/mine',
   requireAuth,
+  requireFreshPassword,
   async (req, res, next) => {
     try {
       const membership = req.membership!
@@ -144,6 +150,7 @@ employeesRouter.get(
 employeesRouter.get(
   '/api/employees/pending',
   requireAuth,
+  requireFreshPassword,
   requireAdmin,
   async (req, res, next) => {
     try {
@@ -168,6 +175,7 @@ employeesRouter.get(
 employeesRouter.post(
   '/api/employees/:employeeId/decision',
   requireAuth,
+  requireFreshPassword,
   requireAdmin,
   async (req, res, next) => {
     try {
@@ -254,6 +262,7 @@ employeesRouter.post(
 employeesRouter.get(
   '/api/employees/published',
   requireAuth,
+  requireFreshPassword,
   async (req, res, next) => {
     try {
       const membership = req.membership!

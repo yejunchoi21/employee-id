@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from 'react'
 import {
+  changePasswordRequest,
   loginRequest,
   logoutRequest,
   meRequest,
@@ -108,7 +109,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (!membership) return
+    if (!membership || membership.mustChangePassword) {
+      return
+    }
 
     let cancelled = false
 
@@ -158,6 +161,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const changePassword = useCallback(
+    async (currentPassword: string, newPassword: string) => {
+      try {
+        const result = await changePasswordRequest(
+          currentPassword,
+          newPassword,
+        )
+        setMembership(result.membership)
+        return { ok: true as const }
+      } catch (error) {
+        const message =
+          error instanceof ApiError
+            ? error.message
+            : 'Could not change password.'
+        return { ok: false as const, error: message }
+      }
+    },
+    [],
+  )
+
   const logout = useCallback(async () => {
     try {
       await logoutRequest()
@@ -182,6 +205,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authError,
       login,
       logout,
+      changePassword,
       refreshOpenIncomingCount,
       refreshPublishedEmployees,
     }),
@@ -194,6 +218,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authError,
       login,
       logout,
+      changePassword,
       refreshOpenIncomingCount,
       refreshPublishedEmployees,
     ],

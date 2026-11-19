@@ -70,6 +70,7 @@ async function seed() {
         role: member.role,
         authUserId: member.authUserId,
         passwordHash,
+        mustChangePassword: false,
       },
       { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true },
     )
@@ -78,29 +79,29 @@ async function seed() {
       throw new Error(`Failed to seed membership for ${member.email}`)
     }
 
-    const existingEmployee = await Employee.findOne({
+    let employee = await Employee.findOne({
       companyId: company._id,
       email: member.email,
     })
 
-    if (existingEmployee) {
-      existingEmployee.departmentId = engineering._id
-      existingEmployee.approvalStatus = 'approved'
-      existingEmployee.name = member.displayName
-      existingEmployee.title = member.title
-      existingEmployee.initials = initialsFromName(member.displayName)
-      existingEmployee.office = member.office
-      existingEmployee.joined = existingEmployee.joined || 'Jan 2024'
-      existingEmployee.phone = member.phone
-      existingEmployee.manager = member.manager
-      existingEmployee.bio = member.bio
-      existingEmployee.skills = member.skills
-      existingEmployee.submittedByMembershipId = membership._id
-      existingEmployee.approvedByMembershipId = membership._id
-      existingEmployee.approvedAt = existingEmployee.approvedAt ?? new Date()
-      await existingEmployee.save()
+    if (employee) {
+      employee.departmentId = engineering._id
+      employee.approvalStatus = 'approved'
+      employee.name = member.displayName
+      employee.title = member.title
+      employee.initials = initialsFromName(member.displayName)
+      employee.office = member.office
+      employee.joined = employee.joined || 'Jan 2024'
+      employee.phone = member.phone
+      employee.manager = member.manager
+      employee.bio = member.bio
+      employee.skills = member.skills
+      employee.submittedByMembershipId = membership._id
+      employee.approvedByMembershipId = membership._id
+      employee.approvedAt = employee.approvedAt ?? new Date()
+      await employee.save()
     } else {
-      await Employee.create({
+      employee = await Employee.create({
         companyId: company._id,
         departmentId: engineering._id,
         approvalStatus: 'approved',
@@ -120,6 +121,10 @@ async function seed() {
         approvedAt: new Date(),
       })
     }
+
+    membership.employeeId = employee._id
+    membership.mustChangePassword = false
+    await membership.save()
   }
 
   console.log('Seeded company:', {

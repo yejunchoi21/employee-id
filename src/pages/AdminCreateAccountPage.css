@@ -1,0 +1,144 @@
+.admin-accounts {
+  width: min(100% - 2rem, 42rem);
+  margin: 0 auto;
+  padding: 1.5rem 0 3rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-accounts__hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.admin-accounts__eyebrow {
+  margin: 0 0 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #0f4c81;
+}
+
+.admin-accounts__hero h1 {
+  margin: 0;
+  font-family: var(--nl-display);
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  letter-spacing: 0.04em;
+  line-height: 0.95;
+}
+
+.admin-accounts__hero p {
+  margin: 0.45rem 0 0;
+  color: var(--nl-muted);
+  max-width: 28rem;
+}
+
+.admin-accounts__hero a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.35rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid rgba(15, 76, 129, 0.22);
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  color: #0f4c81;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.admin-accounts__form {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(15, 76, 129, 0.12);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.admin-accounts__form fieldset {
+  margin: 0;
+  padding: 0.85rem;
+  border: 1px solid rgba(15, 76, 129, 0.12);
+  border-radius: 0.75rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.admin-accounts__form legend {
+  padding: 0 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #0f4c81;
+}
+
+.admin-accounts__form label {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.admin-accounts__form label span {
+  font-size: 0.84rem;
+  font-weight: 750;
+}
+
+.admin-accounts__form input,
+.admin-accounts__form select,
+.admin-accounts__form textarea {
+  width: 100%;
+  min-height: 2.4rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.55rem;
+  font: inherit;
+  background: #ffffff;
+}
+
+.admin-accounts__form textarea {
+  min-height: 5rem;
+  resize: vertical;
+}
+
+.admin-accounts__form button[type='submit'] {
+  justify-self: start;
+  min-height: 2.45rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #0f4c81;
+  border-radius: 0.55rem;
+  background: #0f4c81;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.admin-accounts__form button[type='submit']:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.admin-accounts__error {
+  margin: 0;
+  color: #b42318;
+  font-weight: 650;
+}
+
+.admin-accounts__success {
+  margin: 0;
+  color: #166534;
+  font-weight: 650;
+}
+
+.admin-accounts__hero a:focus-visible,
+.admin-accounts__form input:focus-visible,
+.admin-accounts__form select:focus-visible,
+.admin-accounts__form textarea:focus-visible,
+.admin-accounts__form button:focus-visible {
+  outline: 3px solid #38bdf8;
+  outline-offset: 2px;
+}

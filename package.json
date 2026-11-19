@@ -7,6 +7,7 @@
     "dev": "vite",
     "dev:server": "npm --prefix server run dev",
     "seed:server": "npm --prefix server run seed",
+    "bootstrap-admin": "npm --prefix server run bootstrap-admin --",
     "test:server": "npm --prefix server run test",
     "build": "tsc -b && vite build",
     "lint": "eslint .",

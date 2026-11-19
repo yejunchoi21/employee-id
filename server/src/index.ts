@@ -3,6 +3,7 @@ import cors from 'cors'
 import express from 'express'
 import { env } from './config/env.js'
 import { connectMongo } from './db/connect.js'
+import { adminAccountsRouter } from './routes/adminAccounts.js'
 import { authRouter } from './routes/auth.js'
 import { departmentsRouter } from './routes/departments.js'
 import { employeesRouter } from './routes/employees.js'
@@ -25,6 +26,7 @@ async function main() {
   app.use(healthRouter)
   app.use(metaRouter)
   app.use(authRouter)
+  app.use(adminAccountsRouter)
   app.use(departmentsRouter)
   app.use(employeesRouter)
   app.use(helpRequestsRouter)

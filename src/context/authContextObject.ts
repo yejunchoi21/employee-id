@@ -9,8 +9,15 @@ export interface AuthContextValue {
   publishedEmployees: PublishedEmployeeDto[]
   departmentNamesById: Record<string, string>
   authError: string | null
-  login: (email: string, password: string) => Promise<{ ok: true } | { ok: false; error: string }>
+  login: (
+    email: string,
+    password: string,
+  ) => Promise<{ ok: true } | { ok: false; error: string }>
   logout: () => Promise<void>
+  changePassword: (
+    currentPassword: string,
+    newPassword: string,
+  ) => Promise<{ ok: true } | { ok: false; error: string }>
   refreshOpenIncomingCount: () => Promise<void>
   refreshPublishedEmployees: () => Promise<void>
 }

@@ -7,6 +7,8 @@ export interface AuthenticatedMembership {
   email: string
   displayName: string
   role: MembershipRole
+  employeeId: Types.ObjectId | null
+  mustChangePassword: boolean
 }
 
 declare global {

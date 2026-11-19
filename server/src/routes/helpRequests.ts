@@ -1,6 +1,9 @@
 import { Router, type NextFunction, type Request, type Response } from 'express'
 import { Types } from 'mongoose'
-import { requireAuth } from '../middleware/requireAuth.js'
+import {
+  requireAuth,
+  requireFreshPassword,
+} from '../middleware/requireAuth.js'
 import { Employee, HelpRequest, Membership } from '../models/index.js'
 import {
   canAccessHelpRequest,
@@ -121,6 +124,7 @@ function actorForRequest(input: {
 helpRequestsRouter.post(
   '/api/help-requests',
   requireAuth,
+  requireFreshPassword,
   async (req, res, next) => {
     try {
       const membership = req.membership!
@@ -188,6 +192,7 @@ helpRequestsRouter.post(
 helpRequestsRouter.get(
   '/api/help-requests',
   requireAuth,
+  requireFreshPassword,
   async (req, res, next) => {
     try {
       const membership = req.membership!
@@ -249,6 +254,7 @@ helpRequestsRouter.get(
 helpRequestsRouter.get(
   '/api/help-requests/open-count',
   requireAuth,
+  requireFreshPassword,
   async (req, res, next) => {
     try {
       const membership = req.membership!
@@ -281,6 +287,7 @@ helpRequestsRouter.get(
 helpRequestsRouter.get(
   '/api/help-requests/:requestId',
   requireAuth,
+  requireFreshPassword,
   async (req, res, next) => {
     try {
       const membership = req.membership!
@@ -418,6 +425,7 @@ async function transitionHelpRequest(input: {
 helpRequestsRouter.post(
   '/api/help-requests/:requestId/accept',
   requireAuth,
+  requireFreshPassword,
   (req, res, next) =>
     transitionHelpRequest({
       req,
@@ -431,6 +439,7 @@ helpRequestsRouter.post(
 helpRequestsRouter.post(
   '/api/help-requests/:requestId/decline',
   requireAuth,
+  requireFreshPassword,
   (req, res, next) =>
     transitionHelpRequest({
       req,
@@ -444,6 +453,7 @@ helpRequestsRouter.post(
 helpRequestsRouter.post(
   '/api/help-requests/:requestId/cancel',
   requireAuth,
+  requireFreshPassword,
   (req, res, next) =>
     transitionHelpRequest({
       req,
@@ -457,6 +467,7 @@ helpRequestsRouter.post(
 helpRequestsRouter.post(
   '/api/help-requests/:requestId/resolve',
   requireAuth,
+  requireFreshPassword,
   (req, res, next) =>
     transitionHelpRequest({
       req,

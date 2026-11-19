@@ -37,6 +37,8 @@ export async function requireAuth(
       email: membership.email,
       displayName: membership.displayName,
       role: membership.role,
+      employeeId: membership.employeeId ?? null,
+      mustChangePassword: Boolean(membership.mustChangePassword),
     }
 
     next()
@@ -57,6 +59,29 @@ export function requireAdmin(
 
   if (req.membership.role !== 'admin') {
     res.status(403).json({ ok: false, error: 'Admin role required.' })
+    return
+  }
+
+  next()
+}
+
+/** Blocks app APIs until a temporary password has been replaced. */
+export function requireFreshPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  if (!req.membership) {
+    res.status(401).json({ ok: false, error: 'Authentication required.' })
+    return
+  }
+
+  if (req.membership.mustChangePassword) {
+    res.status(403).json({
+      ok: false,
+      error: 'You must change your temporary password before continuing.',
+      code: 'PASSWORD_CHANGE_REQUIRED',
+    })
     return
   }
 

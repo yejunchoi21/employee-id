@@ -1,7 +1,9 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import ChangePasswordDialog from './components/ChangePasswordDialog'
 import SiteHeader from './components/SiteHeader'
 import { AuthProvider } from './context/AuthProvider'
 import { EmployeeDirectoryProvider } from './context/EmployeeDirectoryProvider'
+import AdminCreateAccountPage from './pages/AdminCreateAccountPage'
 import DirectoryPage from './pages/DirectoryPage'
 import RequestsPage from './pages/RequestsPage'
 import SignupPage from './pages/SignupPage'
@@ -20,8 +22,13 @@ function App() {
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/directory" element={<DirectoryPage />} />
               <Route path="/requests" element={<RequestsPage />} />
+              <Route
+                path="/admin/accounts"
+                element={<AdminCreateAccountPage />}
+              />
               <Route path="*" element={<Navigate to="/signup" replace />} />
             </Routes>
+            <ChangePasswordDialog />
           </div>
         </EmployeeDirectoryProvider>
       </AuthProvider>

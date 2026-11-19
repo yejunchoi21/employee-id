@@ -30,6 +30,21 @@ const membershipSchema = new Schema(
       required: true,
       default: 'member',
     },
+    /** Linked directory employee card for this account. */
+    employeeId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Employee',
+      index: true,
+    },
+    /**
+     * When true, the member must set a new password before using the app.
+     * Set for admin-provisioned accounts with a temporary initial password.
+     */
+    mustChangePassword: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
     /** Stable subject id used inside signed session tokens. */
     authUserId: { type: String, required: true, trim: true, unique: true },
     /** bcrypt hash — never return this field from APIs. */
@@ -39,6 +54,10 @@ const membershipSchema = new Schema(
 )
 
 membershipSchema.index({ companyId: 1, email: 1 }, { unique: true })
+membershipSchema.index(
+  { employeeId: 1 },
+  { unique: true, sparse: true },
+)
 
 export type MembershipDocument = InferSchemaType<typeof membershipSchema> & {
   _id: Types.ObjectId
