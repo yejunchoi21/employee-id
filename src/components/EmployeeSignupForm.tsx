@@ -1,4 +1,5 @@
 import { useEffect, useId, useState, type FormEvent } from 'react'
+import { SUGGESTED_DEPARTMENTS } from '../data/departments'
 import type { EmployeeSignupInput } from '../utils/createEmployee'
 import PortraitUploadField from './PortraitUploadField'
 import './EmployeeSignupForm.css'
@@ -23,6 +24,9 @@ const emptyForm: EmployeeSignupInput = {
   manager: '',
   bio: '',
   skills: '',
+  chatProfileUrl: '',
+  timeZone: '',
+  askMeAbout: '',
 }
 
 function EmployeeSignupForm({
@@ -151,14 +155,9 @@ function EmployeeSignupForm({
               onChange={(event) => updateField('department', event.target.value)}
             />
             <datalist id={`${formId}-departments`}>
-              <option value="Design" />
-              <option value="Engineering" />
-              <option value="People" />
-              <option value="Analytics" />
-              <option value="Customer Success" />
-              <option value="Marketing" />
-              <option value="Security" />
-              <option value="Operations" />
+              {SUGGESTED_DEPARTMENTS.map((name) => (
+                <option key={name} value={name} />
+              ))}
             </datalist>
           </div>
 
@@ -217,6 +216,37 @@ function EmployeeSignupForm({
           </div>
 
           <div className="signup__field">
+            <label htmlFor={`${formId}-timezone`}>Time zone (optional)</label>
+            <input
+              id={`${formId}-timezone`}
+              name="timeZone"
+              type="text"
+              placeholder="America/Los_Angeles"
+              value={form.timeZone ?? ''}
+              disabled={busy}
+              onChange={(event) => updateField('timeZone', event.target.value)}
+            />
+          </div>
+
+          <div className="signup__field">
+            <label htmlFor={`${formId}-chat`}>
+              Work chat profile URL (optional)
+            </label>
+            <input
+              id={`${formId}-chat`}
+              name="chatProfileUrl"
+              type="url"
+              placeholder="https://"
+              value={form.chatProfileUrl ?? ''}
+              disabled={busy}
+              onChange={(event) =>
+                updateField('chatProfileUrl', event.target.value)
+              }
+            />
+            <p className="signup__help">HTTPS links only for the open-chat action.</p>
+          </div>
+
+          <div className="signup__field">
             <label htmlFor={`${formId}-skills`}>Skills</label>
             <input
               id={`${formId}-skills`}
@@ -230,6 +260,19 @@ function EmployeeSignupForm({
             />
             <p className="signup__help">Separate skills with commas.</p>
           </div>
+        </div>
+
+        <div className="signup__field signup__field--full">
+          <label htmlFor={`${formId}-ask`}>Ask me about (optional)</label>
+          <textarea
+            id={`${formId}-ask`}
+            name="askMeAbout"
+            rows={3}
+            placeholder="Design systems, onboarding, accessibility reviews"
+            value={form.askMeAbout ?? ''}
+            disabled={busy}
+            onChange={(event) => updateField('askMeAbout', event.target.value)}
+          />
         </div>
 
         <div className="signup__field signup__field--full">

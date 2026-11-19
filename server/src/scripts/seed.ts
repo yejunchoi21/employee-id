@@ -1,6 +1,7 @@
 import { connectMongo } from '../db/connect.js'
 import { hashPassword } from '../auth/password.js'
-import { Company, Department, Membership } from '../models/index.js'
+import { Company, Membership } from '../models/index.js'
+import { ensureDefaultDepartments } from '../services/ensureDefaultDepartments.js'
 
 const DEFAULT_PASSWORD = 'Northline!Dev1'
 
@@ -20,22 +21,7 @@ async function seed() {
     throw new Error('Failed to seed company')
   }
 
-  const departmentNames = [
-    'Engineering',
-    'Business',
-    'Design',
-    'People',
-    'Operations',
-  ]
-
-  for (const name of departmentNames) {
-    await Department.findOneAndUpdate(
-      { companyId: company._id, name },
-      { companyId: company._id, name },
-      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true },
-    )
-  }
-
+  const departments = await ensureDefaultDepartments(company._id)
   const passwordHash = await hashPassword(DEFAULT_PASSWORD)
 
   const seededMembers = [
@@ -68,10 +54,6 @@ async function seed() {
     )
   }
 
-  const departments = await Department.find({ companyId: company._id })
-    .sort({ name: 1 })
-    .lean()
-
   console.log('Seeded company:', {
     id: String(company._id),
     name: company.name,
@@ -87,9 +69,6 @@ async function seed() {
   console.log('Seeded memberships (dev passwords):')
   console.log(`  admin@northline.co / ${DEFAULT_PASSWORD} (admin)`)
   console.log(`  member@northline.co / ${DEFAULT_PASSWORD} (member)`)
-  console.log(
-    'Next prerequisite: pending employee submission + admin approval APIs.',
-  )
 
   process.exit(0)
 }

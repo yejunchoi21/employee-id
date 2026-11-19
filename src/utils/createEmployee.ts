@@ -1,4 +1,5 @@
 import { portraitPlaceholder, type Employee } from '../data/employee'
+import { getValidHttpsUrl } from './chatUrl'
 
 export interface EmployeeSignupInput {
   name: string
@@ -10,6 +11,9 @@ export interface EmployeeSignupInput {
   manager: string
   bio: string
   skills: string
+  chatProfileUrl?: string
+  timeZone?: string
+  askMeAbout?: string
   portraitId?: string
   photoUrl?: string
   /** Processed portrait blob kept only in memory until IndexedDB save. */
@@ -44,6 +48,12 @@ export function parseSkills(skills: string) {
   ]
 }
 
+function optionalHttpsField(value: string | undefined) {
+  const trimmed = value?.trim() ?? ''
+  if (!trimmed) return undefined
+  return getValidHttpsUrl(trimmed) ?? trimmed
+}
+
 export function createEmployeeFromSignup(
   input: EmployeeSignupInput,
   existingIds: string[],
@@ -63,6 +73,10 @@ export function createEmployeeFromSignup(
     }
   }
 
+  const chatProfileUrl = optionalHttpsField(input.chatProfileUrl)
+  const timeZone = trimField(input.timeZone ?? '')
+  const askMeAbout = trimField(input.askMeAbout ?? '')
+
   const employee: Employee = {
     id: `EMP-${nextNumber}`,
     name,
@@ -80,9 +94,10 @@ export function createEmployeeFromSignup(
     skills: parseSkills(input.skills),
   }
 
-  if (input.portraitId) {
-    employee.portraitId = input.portraitId
-  }
+  if (chatProfileUrl) employee.chatProfileUrl = chatProfileUrl
+  if (timeZone) employee.timeZone = timeZone
+  if (askMeAbout) employee.askMeAbout = askMeAbout
+  if (input.portraitId) employee.portraitId = input.portraitId
 
   return employee
 }
@@ -92,6 +107,10 @@ export function applyEmployeeUpdate(
   input: EmployeeSignupInput,
 ): Employee {
   const name = trimField(input.name)
+  const chatProfileUrl = optionalHttpsField(input.chatProfileUrl)
+  const timeZone = trimField(input.timeZone ?? '')
+  const askMeAbout = trimField(input.askMeAbout ?? '')
+
   const updated: Employee = {
     ...existing,
     name,
@@ -104,7 +123,17 @@ export function applyEmployeeUpdate(
     manager: trimField(input.manager),
     bio: trimField(input.bio),
     skills: parseSkills(input.skills),
+    isDemo: false,
   }
+
+  if (chatProfileUrl) updated.chatProfileUrl = chatProfileUrl
+  else delete updated.chatProfileUrl
+
+  if (timeZone) updated.timeZone = timeZone
+  else delete updated.timeZone
+
+  if (askMeAbout) updated.askMeAbout = askMeAbout
+  else delete updated.askMeAbout
 
   if (input.removePortrait) {
     delete updated.portraitId

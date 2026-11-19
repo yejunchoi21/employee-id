@@ -9,18 +9,24 @@ metaRouter.get('/api/meta/foundation', (_req, res) => {
   res.json({
     ready: {
       mongoModels: ['Company', 'Department', 'Membership', 'Employee'],
-      departmentScopedQueries: true,
-      approvedOnlyDirectoryFilter: true,
+      defaultDepartments: [
+        'Engineering',
+        'Business',
+        'Design',
+        'Marketing',
+        'Human Resources',
+      ],
+      departmentListFromDatabase: true,
       authentication: true,
       companyMembershipFromSession: true,
-      adminRoleGate: true,
+      pendingEmployeeSubmissions: true,
+      adminApprovalDecisions: true,
+      approvedOnlyPublishedList: true,
     },
-    blockedUntilEmployeeWorkflow: [
-      'Populate signup department dropdown from company departments',
-      'Create pending employee submissions',
-      'Admin approval workflow',
+    blockedUntilNextMilestone: [
+      'Frontend department dropdown wired to /api/departments',
       'SSE company fan-out after approval/department moves',
-      'Company-scoped directory rack feed',
+      'Company-scoped rotating rack feed',
     ],
     note:
       'companyId is taken from the authenticated Membership session cookie, never from a form field.',

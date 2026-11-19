@@ -4,6 +4,8 @@ import express from 'express'
 import { env } from './config/env.js'
 import { connectMongo } from './db/connect.js'
 import { authRouter } from './routes/auth.js'
+import { departmentsRouter } from './routes/departments.js'
+import { employeesRouter } from './routes/employees.js'
 import { healthRouter } from './routes/health.js'
 import { metaRouter } from './routes/meta.js'
 
@@ -22,6 +24,8 @@ async function main() {
   app.use(healthRouter)
   app.use(metaRouter)
   app.use(authRouter)
+  app.use(departmentsRouter)
+  app.use(employeesRouter)
 
   app.use(
     (

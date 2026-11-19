@@ -62,6 +62,9 @@ function EmployeeEditDialog({
         manager: employee.manager,
         bio: employee.bio,
         skills: employee.skills.join(', '),
+        chatProfileUrl: employee.chatProfileUrl ?? '',
+        timeZone: employee.timeZone ?? '',
+        askMeAbout: employee.askMeAbout ?? '',
       })
     }
   }
@@ -307,6 +310,32 @@ function EmployeeEditDialog({
                 />
               </div>
               <div className="signup__field">
+                <label htmlFor={`${formId}-timezone`}>Time zone (optional)</label>
+                <input
+                  id={`${formId}-timezone`}
+                  type="text"
+                  placeholder="America/Los_Angeles"
+                  value={form.timeZone ?? ''}
+                  disabled={busy}
+                  onChange={(event) => updateField('timeZone', event.target.value)}
+                />
+              </div>
+              <div className="signup__field">
+                <label htmlFor={`${formId}-chat`}>
+                  Work chat profile URL (optional)
+                </label>
+                <input
+                  id={`${formId}-chat`}
+                  type="url"
+                  placeholder="https://"
+                  value={form.chatProfileUrl ?? ''}
+                  disabled={busy}
+                  onChange={(event) =>
+                    updateField('chatProfileUrl', event.target.value)
+                  }
+                />
+              </div>
+              <div className="signup__field">
                 <label htmlFor={`${formId}-skills`}>Skills</label>
                 <input
                   id={`${formId}-skills`}
@@ -317,6 +346,19 @@ function EmployeeEditDialog({
                   onChange={(event) => updateField('skills', event.target.value)}
                 />
               </div>
+            </div>
+
+            <div className="signup__field signup__field--full">
+              <label htmlFor={`${formId}-ask`}>Ask me about (optional)</label>
+              <textarea
+                id={`${formId}-ask`}
+                rows={3}
+                value={form.askMeAbout ?? ''}
+                disabled={busy}
+                onChange={(event) =>
+                  updateField('askMeAbout', event.target.value)
+                }
+              />
             </div>
 
             <div className="signup__field signup__field--full">

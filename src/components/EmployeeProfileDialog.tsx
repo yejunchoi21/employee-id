@@ -1,5 +1,7 @@
 import { useEffect, useId, useRef } from 'react'
 import type { Employee } from '../data/employee'
+import { optionalText } from '../utils/displayField'
+import EmployeeContactActions from './EmployeeContactActions'
 import './EmployeeProfileDialog.css'
 
 interface EmployeeProfileDialogProps {
@@ -12,6 +14,22 @@ interface EmployeeProfileDialogProps {
 
 function phoneHref(phone: string) {
   return `tel:${phone.replace(/[^\d+]/g, '')}`
+}
+
+function DetailRow({
+  label,
+  value,
+}: {
+  label: string
+  value: string | null
+}) {
+  if (!value) return null
+  return (
+    <div>
+      <dt>{label}</dt>
+      <dd>{value}</dd>
+    </div>
+  )
 }
 
 function EmployeeProfileDialog({
@@ -35,8 +53,17 @@ function EmployeeProfileDialog({
       onClose()
     }
 
+    const handleCancel = (event: Event) => {
+      event.preventDefault()
+      dialog.close()
+    }
+
     dialog.addEventListener('close', handleClose)
-    return () => dialog.removeEventListener('close', handleClose)
+    dialog.addEventListener('cancel', handleCancel)
+    return () => {
+      dialog.removeEventListener('close', handleClose)
+      dialog.removeEventListener('cancel', handleCancel)
+    }
   }, [onClose])
 
   useEffect(() => {
@@ -69,6 +96,15 @@ function EmployeeProfileDialog({
     dialogRef.current?.close()
   }
 
+  const phone = optionalText(employee?.phone)
+  const office = optionalText(employee?.office)
+  const manager = optionalText(employee?.manager)
+  const joined = optionalText(employee?.joined)
+  const timeZone = optionalText(employee?.timeZone)
+  const bio = optionalText(employee?.bio)
+  const askMeAbout = optionalText(employee?.askMeAbout)
+  const email = optionalText(employee?.email)
+
   return (
     <dialog
       ref={dialogRef}
@@ -92,6 +128,11 @@ function EmployeeProfileDialog({
               <h2 id={titleId} className="employee-profile__title">
                 Employee profile
               </h2>
+              {employee.isDemo ? (
+                <p className="employee-profile__demo-banner">
+                  Fictional demo profile for browsing the directory
+                </p>
+              ) : null}
             </div>
             <div className="employee-profile__header-actions">
               {canEdit ? (
@@ -148,46 +189,58 @@ function EmployeeProfileDialog({
               </div>
             </div>
 
+            <EmployeeContactActions employee={employee} />
+
             <dl className="employee-profile__details">
-              <div>
-                <dt>Work email</dt>
-                <dd>
-                  <a href={`mailto:${employee.email}`}>{employee.email}</a>
-                </dd>
-              </div>
-              <div>
-                <dt>Work phone</dt>
-                <dd>
-                  <a href={phoneHref(employee.phone)}>{employee.phone}</a>
-                </dd>
-              </div>
-              <div>
-                <dt>Office</dt>
-                <dd>{employee.office}</dd>
-              </div>
-              <div>
-                <dt>Manager</dt>
-                <dd>{employee.manager}</dd>
-              </div>
-              <div>
-                <dt>Joined</dt>
-                <dd>{employee.joined}</dd>
-              </div>
+              {email ? (
+                <div>
+                  <dt>Work email</dt>
+                  <dd>
+                    <a href={`mailto:${email}`}>{email}</a>
+                  </dd>
+                </div>
+              ) : null}
+              {phone ? (
+                <div>
+                  <dt>Work phone</dt>
+                  <dd>
+                    <a href={phoneHref(phone)}>{phone}</a>
+                  </dd>
+                </div>
+              ) : null}
+              <DetailRow label="Office" value={office} />
+              <DetailRow label="Time zone" value={timeZone} />
+              <DetailRow label="Manager" value={manager} />
+              <DetailRow label="Joined" value={joined} />
             </dl>
 
-            <section className="employee-profile__section" aria-label="Biography">
-              <h4>Bio</h4>
-              <p>{employee.bio}</p>
-            </section>
+            {askMeAbout ? (
+              <section
+                className="employee-profile__section"
+                aria-label="Ask me about"
+              >
+                <h4>Ask me about</h4>
+                <p>{askMeAbout}</p>
+              </section>
+            ) : null}
 
-            <section className="employee-profile__section" aria-label="Skills">
-              <h4>Skills</h4>
-              <ul className="employee-profile__skills">
-                {employee.skills.map((skill) => (
-                  <li key={skill}>{skill}</li>
-                ))}
-              </ul>
-            </section>
+            {bio ? (
+              <section className="employee-profile__section" aria-label="Biography">
+                <h4>Bio</h4>
+                <p>{bio}</p>
+              </section>
+            ) : null}
+
+            {employee.skills.length > 0 ? (
+              <section className="employee-profile__section" aria-label="Skills">
+                <h4>Skills</h4>
+                <ul className="employee-profile__skills">
+                  {employee.skills.map((skill) => (
+                    <li key={skill}>{skill}</li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
           </div>
         </div>
       ) : null}

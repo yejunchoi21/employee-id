@@ -1,6 +1,7 @@
 import type { Employee } from '../data/employee'
 
 export type SortOrder = 'asc' | 'desc'
+export type DirectoryViewMode = 'cards' | 'grid' | 'list'
 
 export interface EmployeeFilterOptions {
   search: string
@@ -26,6 +27,9 @@ function matchesSearch(employee: Employee, query: string) {
     employee.id,
     employee.title,
     employee.department,
+    employee.office,
+    employee.askMeAbout ?? '',
+    ...employee.skills,
   ]
     .join(' ')
     .toLowerCase()

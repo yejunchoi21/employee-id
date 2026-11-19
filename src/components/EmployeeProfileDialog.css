@@ -55,6 +55,15 @@
   line-height: 1.2;
 }
 
+.employee-profile__demo-banner {
+  margin: 0.45rem 0 0;
+  max-width: 16rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #0f4c81;
+}
+
 .employee-profile__header-actions {
   display: flex;
   flex-wrap: wrap;

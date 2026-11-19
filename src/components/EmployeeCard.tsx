@@ -110,7 +110,12 @@ function EmployeeCard({
 
           <div className="employee-card__panel">
             <div className="employee-card__identity">
-              <h2 className="employee-card__name">{employee.name}</h2>
+              <div className="employee-card__name-row">
+                <h2 className="employee-card__name">{employee.name}</h2>
+                {employee.isDemo ? (
+                  <span className="employee-card__demo">Demo</span>
+                ) : null}
+              </div>
               <p className="employee-card__title">{employee.title}</p>
             </div>
 

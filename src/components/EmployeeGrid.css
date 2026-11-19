@@ -1,0 +1,118 @@
+.employee-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+  gap: 0.9rem;
+  width: min(100% - 2rem, 56rem);
+  margin: 0.35rem auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+.employee-grid__card {
+  display: grid;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.85rem;
+  border: 1px solid rgba(15, 76, 129, 0.14);
+  border-radius: 0.9rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(244, 248, 252, 0.84));
+  box-shadow: 0 12px 28px rgba(15, 35, 60, 0.08);
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.employee-grid__card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(15, 35, 60, 0.12);
+}
+
+.employee-grid__card:focus-visible {
+  outline: 3px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+.employee-grid__photo {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 0.65rem;
+  background: #dbeafe;
+}
+
+.employee-grid__topline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+
+.employee-grid__name {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #0b1220;
+}
+
+.employee-grid__demo {
+  flex-shrink: 0;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(15, 76, 129, 0.1);
+  color: #0f4c81;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.employee-grid__title {
+  margin: 0.2rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f4c81;
+}
+
+.employee-grid__meta,
+.employee-grid__ask {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+  line-height: 1.4;
+}
+
+.employee-grid__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.employee-grid__skills li {
+  padding: 0.18rem 0.45rem;
+  border-radius: 999px;
+  background: #e8f1f8;
+  color: #0f4c81;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .employee-grid__card {
+    transition: none;
+  }
+
+  .employee-grid__card:hover {
+    transform: none;
+  }
+}

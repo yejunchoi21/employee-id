@@ -18,8 +18,9 @@ function DirectoryEmptyState({
         <p className="directory-empty__eyebrow">Empty rack</p>
         <h2 className="directory-empty__title">No employee cards yet</h2>
         <p className="directory-empty__message">
-          Create the first badge to start the Northline coat rack. Portraits and
-          details stay in this browser.
+          Add an employee to start the directory, or refresh to load the labeled
+          fictional demo profiles. Your saved cards stay in this browser and are
+          never overwritten.
         </p>
         <Link className="directory-empty__clear" to="/signup">
           Add employee
@@ -33,8 +34,8 @@ function DirectoryEmptyState({
       <p className="directory-empty__eyebrow">No matches</p>
       <h2 className="directory-empty__title">No employees found</h2>
       <p className="directory-empty__message">
-        Try a different search term, choose another department, or clear your
-        filters to see everyone again.
+        No matches for that expertise search or department. Try another skill
+        keyword, choose a different department, or clear filters.
       </p>
       {filtersActive ? (
         <button

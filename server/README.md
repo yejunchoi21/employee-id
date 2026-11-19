@@ -1,36 +1,36 @@
-# Employee ID server foundation
+# Employee ID server
 
-MongoDB-backed foundation for company-scoped departments, membership auth,
-and approval-gated employee cards.
+MongoDB-backed company departments, membership auth, and approval-gated
+employee submissions.
 
 ## Working now
 
-- MongoDB connection (`/health`)
-- Models: `Company`, `Department`, `Membership`, `Employee`
+- MongoDB connection
 - Session auth bound to `Membership` (httpOnly cookie)
-- `companyId` / `role` come from the authenticated membership, not form fields
-- Seeded Northline departments + admin/member accounts
+- Default company departments as DB records with stable IDs:
+  Engineering, Business, Design, Marketing, Human Resources
+- `GET /api/departments` (auth) — dropdown source from DB
+- `POST /api/employees/submissions` (auth) — create/update pending card
+- `GET /api/employees/pending` (admin)
+- `POST /api/employees/:id/decision` (admin) — approve | reject
+- `GET /api/employees/published` (auth) — approved-only safety list
 
-## Not implemented yet
+Pending and rejected cards are excluded from `/api/employees/published`.
 
-- Pending employee submission API
-- Admin approval API
-- Company department listing for signup dropdown
-- SSE realtime fan-out
-- Frontend wiring away from localStorage toward this API
+## Not in this milestone
 
-## Configuration (server only)
+- Rotating rack feed
+- SSE realtime updates
+- Frontend wiring away from localStorage
 
-Copy `.env.example` to `.env` and set:
+## Configuration (server `.env` only)
 
 | Variable | Purpose |
 | --- | --- |
-| `MONGODB_URI` | Mongo connection string (**never** put this in the Vite client) |
-| `AUTH_SECRET` | >= 32 char secret for signing session cookies |
-| `CLIENT_ORIGIN` | Frontend origin allowed by CORS (default `http://localhost:5173`) |
+| `MONGODB_URI` | Mongo connection string (**never** ship to the Vite client) |
+| `AUTH_SECRET` | ≥ 32 char session signing secret |
+| `CLIENT_ORIGIN` | CORS origin (default `http://localhost:5173`) |
 | `PORT` | API port (default `4000`) |
-
-## Setup
 
 ```bash
 cp .env.example .env
@@ -39,18 +39,7 @@ npm run seed
 npm run dev
 ```
 
-### Seeded login accounts (local/dev)
+### Seeded logins
 
 - `admin@northline.co` / `Northline!Dev1` (admin)
 - `member@northline.co` / `Northline!Dev1` (member)
-
-### Auth endpoints
-
-- `POST /api/auth/login` `{ email, password }` → sets httpOnly session cookie
-- `GET /api/auth/me` → returns membership (`companyId`, `role`, …)
-- `POST /api/auth/logout` → clears session cookie
-
-## Next milestone
-
-Pending employee submission + admin approval so an Engineering card can be
-approved and later streamed into company rotations.

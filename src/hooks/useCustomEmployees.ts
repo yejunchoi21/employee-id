@@ -81,6 +81,19 @@ async function hydrateEmployee(stored: StoredEmployee): Promise<Employee> {
     skills: stored.skills,
   }
 
+  if (stored.chatProfileUrl?.trim()) {
+    base.chatProfileUrl = stored.chatProfileUrl.trim()
+  }
+  if (stored.timeZone?.trim()) {
+    base.timeZone = stored.timeZone.trim()
+  }
+  if (stored.askMeAbout?.trim()) {
+    base.askMeAbout = stored.askMeAbout.trim()
+  }
+  if (stored.isDemo) {
+    base.isDemo = true
+  }
+
   if (!stored.portraitId) {
     return base
   }

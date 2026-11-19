@@ -4,13 +4,28 @@ import DirectoryControls from '../components/DirectoryControls'
 import DirectoryEmptyState from '../components/DirectoryEmptyState'
 import EmployeeCarousel from '../components/EmployeeCarousel'
 import EmployeeEditDialog from '../components/EmployeeEditDialog'
+import EmployeeGrid from '../components/EmployeeGrid'
+import EmployeeList from '../components/EmployeeList'
 import EmployeeProfileDialog from '../components/EmployeeProfileDialog'
 import { useEmployeeDirectory } from '../hooks/useEmployeeDirectory'
 import type { Employee } from '../data/employee'
 import type { EmployeeSignupInput } from '../utils/createEmployee'
+import type { DirectoryViewMode } from '../utils/employeeFilters'
 
 interface DirectoryLocationState {
   focusEmployeeId?: string
+}
+
+const VIEW_STORAGE_KEY = 'northline-directory-view'
+
+function readStoredView(): DirectoryViewMode {
+  try {
+    const raw = window.localStorage.getItem(VIEW_STORAGE_KEY)
+    if (raw === 'cards' || raw === 'grid' || raw === 'list') return raw
+  } catch {
+    // Ignore storage failures and fall back to cards.
+  }
+  return 'cards'
 }
 
 function DirectoryPage() {
@@ -22,6 +37,7 @@ function DirectoryPage() {
     null,
   )
   const [editEmployeeId, setEditEmployeeId] = useState<string | null>(null)
+  const [view, setView] = useState<DirectoryViewMode>(() => readStoredView())
 
   const {
     allEmployees,
@@ -87,6 +103,16 @@ function DirectoryPage() {
   const hasAnyEmployees = allEmployees.length > 0
   const filtersActive =
     search.trim().length > 0 || department !== 'all' || sort !== 'asc'
+  const hasDemoProfiles = allEmployees.some((employee) => employee.isDemo)
+
+  const handleViewChange = useCallback((nextView: DirectoryViewMode) => {
+    setView(nextView)
+    try {
+      window.localStorage.setItem(VIEW_STORAGE_KEY, nextView)
+    } catch {
+      // Ignore persistence failures.
+    }
+  }, [])
 
   const handleViewProfile = useCallback((employee: Employee) => {
     profileTriggerRef.current = document.activeElement as HTMLElement | null
@@ -166,25 +192,33 @@ function DirectoryPage() {
           Employee Directory
         </h1>
         <p className="page__lede">
-          Browse the Northline coat rack, isolate a card for details, and keep
-          your own badge up to date.
+          Search by expertise, switch between cards, grid, or list, and open a
+          profile to email or copy contact details.
         </p>
         <div className="page__actions">
           <Link className="page__button" to="/signup">
             Add employee
           </Link>
         </div>
+        {hasDemoProfiles ? (
+          <p className="page__footer-note">
+            Demo profiles are labeled and fictional. Your saved cards stay in
+            this browser and are never overwritten.
+          </p>
+        ) : null}
       </div>
 
       <DirectoryControls
         search={search}
         department={department}
         sort={sort}
+        view={view}
         departments={departments}
         resultCount={visibleEmployees.length}
         onSearchChange={setSearch}
         onDepartmentChange={setDepartment}
         onSortChange={setSort}
+        onViewChange={handleViewChange}
         onClear={clearFilters}
       />
 
@@ -195,7 +229,7 @@ function DirectoryPage() {
             filtersActive={filtersActive}
             onClear={clearFilters}
           />
-        ) : (
+        ) : view === 'cards' ? (
           <EmployeeCarousel
             key={visibleIdsKey}
             employees={visibleEmployees}
@@ -207,6 +241,16 @@ function DirectoryPage() {
             onDeleteEmployee={(employee) => {
               void handleDeleteEmployee(employee)
             }}
+          />
+        ) : view === 'grid' ? (
+          <EmployeeGrid
+            employees={visibleEmployees}
+            onViewProfile={handleViewProfile}
+          />
+        ) : (
+          <EmployeeList
+            employees={visibleEmployees}
+            onViewProfile={handleViewProfile}
           />
         )}
       </div>
