@@ -10,6 +10,7 @@ import { employeesRouter } from './routes/employees.js'
 import { healthRouter } from './routes/health.js'
 import { helpRequestsRouter } from './routes/helpRequests.js'
 import { metaRouter } from './routes/meta.js'
+import { onboardingRouter } from './routes/onboarding.js'
 
 async function main() {
   await connectMongo()
@@ -30,6 +31,7 @@ async function main() {
   app.use(departmentsRouter)
   app.use(employeesRouter)
   app.use(helpRequestsRouter)
+  app.use(onboardingRouter)
 
   app.use(
     (

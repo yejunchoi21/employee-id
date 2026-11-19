@@ -20,3 +20,8 @@ export {
   type HelpRequestPriority,
   type HelpRequestStatus,
 } from './HelpRequest.js'
+export {
+  OnboardingPlan,
+  type OnboardingPlanDocument,
+  type OnboardingTaskDocument,
+} from './OnboardingPlan.js'

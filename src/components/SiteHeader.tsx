@@ -69,6 +69,42 @@ function SiteHeader() {
               </span>
             ) : null}
           </NavLink>
+          {membership ? (
+            <NavLink
+              to="/onboarding"
+              className={({ isActive }) =>
+                ['site-header__link', isActive ? 'is-active' : '']
+                  .filter(Boolean)
+                  .join(' ')
+              }
+            >
+              My onboarding
+            </NavLink>
+          ) : null}
+          {membership ? (
+            <NavLink
+              to="/onboarding/team"
+              className={({ isActive }) =>
+                ['site-header__link', isActive ? 'is-active' : '']
+                  .filter(Boolean)
+                  .join(' ')
+              }
+            >
+              Team onboarding
+            </NavLink>
+          ) : null}
+          {membership?.role === 'admin' ? (
+            <NavLink
+              to="/admin/onboarding"
+              className={({ isActive }) =>
+                ['site-header__link', isActive ? 'is-active' : '']
+                  .filter(Boolean)
+                  .join(' ')
+              }
+            >
+              Onboarding admin
+            </NavLink>
+          ) : null}
           {membership?.role === 'admin' ? (
             <NavLink
               to="/admin/accounts"
