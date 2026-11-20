@@ -1,5 +1,18 @@
-import { useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, type FormEvent, type ReactNode } from 'react'
+import { Link as RouterLink } from 'react-router-dom'
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  LinearProgress,
+  Link,
+  MenuItem,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { ApiError } from '../api/client'
 import {
   addOnboardingTask,
@@ -10,7 +23,6 @@ import {
   type OnboardingPlanDto,
   type TaskResponsible,
 } from '../api/onboarding'
-import './OnboardingPlanPanel.css'
 
 function formatDate(value: string | null) {
   if (!value) return 'No due date'
@@ -28,15 +40,40 @@ function ProfileLink({
 }: {
   employee: OnboardingEmployeeBrief | null | undefined
 }) {
-  if (!employee) return <span>Unassigned</span>
+  if (!employee) {
+    return (
+      <Typography variant="body2" component="span">
+        Unassigned
+      </Typography>
+    )
+  }
   return (
     <Link
+      component={RouterLink}
       to="/directory"
       state={{ focusEmployeeId: employee.employeeCode }}
-      className="onboarding-panel__profile-link"
+      underline="hover"
+      variant="body2"
     >
       {employee.name}
     </Link>
+  )
+}
+
+function PersonBlock({
+  label,
+  children,
+}: {
+  label: string
+  children: ReactNode
+}) {
+  return (
+    <Box>
+      <Typography variant="overline" color="text.secondary" component="div">
+        {label}
+      </Typography>
+      {children}
+    </Box>
   )
 }
 
@@ -118,270 +155,294 @@ function OnboardingPlanPanel({
     setAdding(false)
   }
 
+  const contacts = plan.keyContacts.filter(
+    (contact): contact is OnboardingEmployeeBrief => Boolean(contact),
+  )
+
   return (
-    <article className="onboarding-panel">
-      <header className="onboarding-panel__header">
-        <div>
-          <p className="onboarding-panel__eyebrow">Onboarding plan</p>
-          <h2>{plan.employee?.name ?? 'New hire'}</h2>
-          <p>
+    <Paper component="article" sx={{ p: 2 }}>
+      <Stack spacing={2}>
+        <Box>
+          <Typography variant="overline" color="primary" sx={{ display: 'block' }}>
+            Onboarding plan
+          </Typography>
+          <Typography variant="h2">{plan.employee?.name ?? 'New hire'}</Typography>
+          <Typography variant="body2" sx={{ mt: 0.5 }}>
             Starts {formatDate(plan.startDate)} · {plan.progress.percent}% complete
             · {plan.progress.remaining} remaining
             {plan.progress.overdue > 0
               ? ` · ${plan.progress.overdue} overdue`
               : ''}
-          </p>
-        </div>
-        <div
-          className="onboarding-panel__progress"
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={plan.progress.percent}
-          aria-label="Onboarding completion"
+          </Typography>
+          <LinearProgress
+            variant="determinate"
+            value={plan.progress.percent}
+            aria-label="Onboarding completion"
+            sx={{ mt: 1.5, height: 8, borderRadius: 4 }}
+          />
+        </Box>
+
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={{ xs: 1.5, sm: 4 }}
+          component="dl"
+          sx={{ m: 0 }}
         >
-          <span style={{ width: `${plan.progress.percent}%` }} />
-        </div>
-      </header>
-
-      <dl className="onboarding-panel__people">
-        <div>
-          <dt>Manager</dt>
-          <dd>
+          <PersonBlock label="Manager">
             <ProfileLink employee={plan.manager} />
-          </dd>
-        </div>
-        <div>
-          <dt>Buddy</dt>
-          <dd>
+          </PersonBlock>
+          <PersonBlock label="Buddy">
             <ProfileLink employee={plan.buddy} />
-          </dd>
-        </div>
-        <div>
-          <dt>Key contacts</dt>
-          <dd>
-            {plan.keyContacts.filter(Boolean).length === 0 ? (
-              <span>None listed</span>
+          </PersonBlock>
+          <PersonBlock label="Key contacts">
+            {contacts.length === 0 ? (
+              <Typography variant="body2">None listed</Typography>
             ) : (
-              <ul>
-                {plan.keyContacts.map((contact) =>
-                  contact ? (
-                    <li key={contact.id}>
-                      <ProfileLink employee={contact} />
-                    </li>
-                  ) : null,
-                )}
-              </ul>
+              <Stack spacing={0.25}>
+                {contacts.map((contact) => (
+                  <ProfileLink key={contact.id} employee={contact} />
+                ))}
+              </Stack>
             )}
-          </dd>
-        </div>
-      </dl>
+          </PersonBlock>
+        </Stack>
 
-      {error ? (
-        <p className="onboarding-panel__error" role="alert">
-          {error}
-        </p>
-      ) : null}
+        {error ? <Alert severity="error">{error}</Alert> : null}
 
-      <ul className="onboarding-panel__tasks">
-        {plan.tasks.map((task) => {
-          const overdue =
-            !task.completedAt &&
-            Boolean(task.dueDate) &&
-            new Date(task.dueDate!).getTime() < nowMs
-          const busy = savingTaskId === task.id
+        <Stack spacing={1} component="ul" sx={{ listStyle: 'none', m: 0, p: 0 }}>
+          {plan.tasks.map((task) => {
+            const overdue =
+              !task.completedAt &&
+              Boolean(task.dueDate) &&
+              new Date(task.dueDate!).getTime() < nowMs
+            const busy = savingTaskId === task.id
 
-          return (
-            <li
-              key={task.id}
-              className={[
-                'onboarding-panel__task',
-                task.completedAt ? 'is-complete' : '',
-                overdue ? 'is-overdue' : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              {editingTaskId === task.id ? (
-                <form
-                  className="onboarding-panel__edit"
-                  onSubmit={(event) => {
-                    event.preventDefault()
-                    void run(task.id, async () => {
-                      const result = await updateOnboardingTask(
-                        plan.id,
-                        task.id,
-                        {
-                          title: editTitle.trim(),
-                          instructions: editInstructions.trim() || null,
-                          dueDate: editDueDate || null,
-                          responsible: editResponsible,
-                        },
-                      )
-                      setEditingTaskId(null)
-                      return result.plan
-                    })
-                  }}
-                >
-                  <label>
-                    <span>Title</span>
-                    <input
+            return (
+              <Paper
+                key={task.id}
+                component="li"
+                sx={{
+                  p: 1.5,
+                  bgcolor: task.completedAt ? 'action.hover' : 'background.paper',
+                  borderColor: overdue ? 'error.main' : undefined,
+                }}
+              >
+                {editingTaskId === task.id ? (
+                  <Stack
+                    component="form"
+                    spacing={1.5}
+                    onSubmit={(event) => {
+                      event.preventDefault()
+                      void run(task.id, async () => {
+                        const result = await updateOnboardingTask(
+                          plan.id,
+                          task.id,
+                          {
+                            title: editTitle.trim(),
+                            instructions: editInstructions.trim() || null,
+                            dueDate: editDueDate || null,
+                            responsible: editResponsible,
+                          },
+                        )
+                        setEditingTaskId(null)
+                        return result.plan
+                      })
+                    }}
+                  >
+                    <TextField
+                      label="Title"
                       value={editTitle}
                       onChange={(event) => setEditTitle(event.target.value)}
                       required
                       disabled={busy}
                     />
-                  </label>
-                  <label>
-                    <span>Instructions</span>
-                    <textarea
+                    <TextField
+                      label="Instructions"
                       value={editInstructions}
-                      onChange={(event) =>
-                        setEditInstructions(event.target.value)
-                      }
-                      rows={2}
+                      onChange={(event) => setEditInstructions(event.target.value)}
+                      multiline
+                      minRows={2}
                       disabled={busy}
                     />
-                  </label>
-                  <label>
-                    <span>Due date</span>
-                    <input
+                    <TextField
+                      label="Due date"
                       type="date"
                       value={editDueDate}
                       onChange={(event) => setEditDueDate(event.target.value)}
                       disabled={busy}
+                      slotProps={{ inputLabel: { shrink: true } }}
                     />
-                  </label>
-                  <label>
-                    <span>Responsible</span>
-                    <select
+                    <TextField
+                      select
+                      label="Responsible"
                       value={editResponsible}
                       onChange={(event) =>
-                        setEditResponsible(
-                          event.target.value as TaskResponsible,
-                        )
+                        setEditResponsible(event.target.value as TaskResponsible)
                       }
                       disabled={busy}
                     >
-                      <option value="new_hire">New hire</option>
-                      <option value="manager">Manager</option>
-                    </select>
-                  </label>
-                  <div className="onboarding-panel__actions">
-                    <button type="submit" disabled={busy}>
-                      {busy ? 'Saving…' : 'Save task'}
-                    </button>
-                    <button
-                      type="button"
-                      className="is-secondary"
-                      disabled={busy}
-                      onClick={() => setEditingTaskId(null)}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <>
-                  <div className="onboarding-panel__task-main">
-                    <strong>{task.title}</strong>
-                    <p>
-                      Due {formatDate(task.dueDate)} · Owner:{' '}
-                      {task.responsible === 'new_hire' ? 'New hire' : 'Manager'}
-                      {task.completedAt
-                        ? ` · Done by ${task.completedByName ?? 'teammate'} on ${formatDate(task.completedAt)}`
-                        : ''}
-                    </p>
-                    {task.instructions ? <p>{task.instructions}</p> : null}
-                  </div>
-                  <div className="onboarding-panel__actions">
-                    {canToggle(task.responsible) ? (
-                      <button
+                      <MenuItem value="new_hire">New hire</MenuItem>
+                      <MenuItem value="manager">Manager</MenuItem>
+                    </TextField>
+                    <Stack direction="row" spacing={1}>
+                      <Button type="submit" variant="contained" disabled={busy}>
+                        {busy ? 'Saving…' : 'Save task'}
+                      </Button>
+                      <Button
                         type="button"
+                        variant="outlined"
                         disabled={busy}
-                        onClick={() =>
-                          void run(task.id, async () => {
-                            const result = task.completedAt
-                              ? await reopenOnboardingTask(plan.id, task.id)
-                              : await completeOnboardingTask(plan.id, task.id)
-                            return result.plan
-                          })
-                        }
+                        onClick={() => setEditingTaskId(null)}
                       >
-                        {busy
-                          ? 'Saving…'
-                          : task.completedAt
-                            ? 'Reopen'
-                            : 'Mark complete'}
-                      </button>
-                    ) : null}
-                    {canManageTasks ? (
-                      <button
-                        type="button"
-                        className="is-secondary"
-                        disabled={busy}
-                        onClick={() => startEdit(task.id)}
+                        Cancel
+                      </Button>
+                    </Stack>
+                  </Stack>
+                ) : (
+                  <Stack
+                    direction={{ xs: 'column', sm: 'row' }}
+                    spacing={1.5}
+                    sx={{
+                      justifyContent: 'space-between',
+                      alignItems: { xs: 'stretch', sm: 'flex-start' },
+                    }}
+                  >
+                    <Box sx={{ minWidth: 0 }}>
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        useFlexGap
+                        sx={{ alignItems: 'center', flexWrap: 'wrap' }}
                       >
-                        Edit
-                      </button>
-                    ) : null}
-                  </div>
-                </>
-              )}
-            </li>
-          )
-        })}
-      </ul>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{
+                            textDecoration: task.completedAt
+                              ? 'line-through'
+                              : 'none',
+                          }}
+                        >
+                          {task.title}
+                        </Typography>
+                        {task.completedAt ? (
+                          <Chip size="small" color="success" label="Done" />
+                        ) : null}
+                        {overdue ? (
+                          <Chip size="small" color="error" label="Overdue" />
+                        ) : null}
+                      </Stack>
+                      <Typography variant="body2">
+                        Due {formatDate(task.dueDate)} · Owner:{' '}
+                        {task.responsible === 'new_hire' ? 'New hire' : 'Manager'}
+                        {task.completedAt
+                          ? ` · Done by ${task.completedByName ?? 'teammate'} on ${formatDate(task.completedAt)}`
+                          : ''}
+                      </Typography>
+                      {task.instructions ? (
+                        <Typography variant="body2" sx={{ mt: 0.5 }}>
+                          {task.instructions}
+                        </Typography>
+                      ) : null}
+                    </Box>
+                    <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
+                      {canToggle(task.responsible) ? (
+                        <Button
+                          type="button"
+                          size="small"
+                          variant="contained"
+                          disabled={busy}
+                          onClick={() =>
+                            void run(task.id, async () => {
+                              const result = task.completedAt
+                                ? await reopenOnboardingTask(plan.id, task.id)
+                                : await completeOnboardingTask(plan.id, task.id)
+                              return result.plan
+                            })
+                          }
+                        >
+                          {busy
+                            ? 'Saving…'
+                            : task.completedAt
+                              ? 'Reopen'
+                              : 'Mark complete'}
+                        </Button>
+                      ) : null}
+                      {canManageTasks ? (
+                        <Button
+                          type="button"
+                          size="small"
+                          variant="outlined"
+                          disabled={busy}
+                          onClick={() => startEdit(task.id)}
+                        >
+                          Edit
+                        </Button>
+                      ) : null}
+                    </Stack>
+                  </Stack>
+                )}
+              </Paper>
+            )
+          })}
+        </Stack>
 
-      {canManageTasks ? (
-        <form className="onboarding-panel__add" onSubmit={(event) => void handleAdd(event)}>
-          <h3>Add task</h3>
-          <label>
-            <span>Title</span>
-            <input
+        {canManageTasks ? (
+          <Stack
+            component="form"
+            spacing={1.5}
+            onSubmit={(event) => void handleAdd(event)}
+          >
+            <Typography variant="h3" component="h3">
+              Add task
+            </Typography>
+            <TextField
+              label="Title"
               value={newTitle}
               onChange={(event) => setNewTitle(event.target.value)}
               required
               disabled={adding}
             />
-          </label>
-          <label>
-            <span>Instructions</span>
-            <textarea
+            <TextField
+              label="Instructions"
               value={newInstructions}
               onChange={(event) => setNewInstructions(event.target.value)}
-              rows={2}
+              multiline
+              minRows={2}
               disabled={adding}
             />
-          </label>
-          <label>
-            <span>Due date</span>
-            <input
+            <TextField
+              label="Due date"
               type="date"
               value={newDueDate}
               onChange={(event) => setNewDueDate(event.target.value)}
               disabled={adding}
+              slotProps={{ inputLabel: { shrink: true } }}
             />
-          </label>
-          <label>
-            <span>Responsible</span>
-            <select
+            <TextField
+              select
+              label="Responsible"
               value={newResponsible}
               onChange={(event) =>
                 setNewResponsible(event.target.value as TaskResponsible)
               }
               disabled={adding}
             >
-              <option value="new_hire">New hire</option>
-              <option value="manager">Manager</option>
-            </select>
-          </label>
-          <button type="submit" disabled={adding || !newTitle.trim()}>
-            {adding ? 'Adding…' : 'Add task'}
-          </button>
-        </form>
-      ) : null}
-    </article>
+              <MenuItem value="new_hire">New hire</MenuItem>
+              <MenuItem value="manager">Manager</MenuItem>
+            </TextField>
+            <Box>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={adding || !newTitle.trim()}
+              >
+                {adding ? 'Adding…' : 'Add task'}
+              </Button>
+            </Box>
+          </Stack>
+        ) : null}
+      </Stack>
+    </Paper>
   )
 }
 

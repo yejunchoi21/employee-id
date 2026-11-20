@@ -1,11 +1,20 @@
-import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
+import { useId, useState, type FormEvent } from 'react'
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { useAuth } from '../hooks/useAuth'
-import './ChangePasswordDialog.css'
 
 function ChangePasswordDialog() {
   const { membership, changePassword, logout } = useAuth()
-  const dialogRef = useRef<HTMLDialogElement>(null)
-  const currentRef = useRef<HTMLInputElement>(null)
   const titleId = useId()
   const errorId = useId()
   const [currentPassword, setCurrentPassword] = useState('')
@@ -15,19 +24,6 @@ function ChangePasswordDialog() {
   const [saving, setSaving] = useState(false)
 
   const required = Boolean(membership?.mustChangePassword)
-
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-
-    if (required) {
-      if (!dialog.open) dialog.showModal()
-      window.requestAnimationFrame(() => currentRef.current?.focus())
-      return
-    }
-
-    if (dialog.open) dialog.close()
-  }, [required])
 
   if (!required) return null
 
@@ -63,90 +59,91 @@ function ChangePasswordDialog() {
   }
 
   return (
-    <dialog
-      ref={dialogRef}
-      className="change-password"
+    <Dialog
+      open
+      fullWidth
+      maxWidth="xs"
+      onClose={() => {
+        // Required dialog: it cannot be dismissed until the password is changed.
+      }}
       aria-labelledby={titleId}
       aria-describedby={error ? errorId : undefined}
-      onCancel={(event) => event.preventDefault()}
+      slotProps={{
+        paper: {
+          component: 'form',
+          onSubmit: (event: FormEvent) => {
+            void handleSubmit(event)
+          },
+        },
+      }}
     >
-      <form
-        className="change-password__sheet"
-        onSubmit={(event) => {
-          void handleSubmit(event)
-        }}
-      >
-        <header>
-          <p className="change-password__eyebrow">Security</p>
-          <h2 id={titleId}>Change your temporary password</h2>
-          <p>
-            Your admin set an initial password for local testing. Choose a new
-            password before using the directory.
-          </p>
-        </header>
-
-        <label>
-          <span>Current temporary password</span>
-          <input
-            ref={currentRef}
+      <DialogTitle component="div" sx={{ pb: 1 }}>
+        <Typography variant="overline" color="primary" sx={{ display: 'block' }}>
+          Security
+        </Typography>
+        <Typography variant="h2" id={titleId}>
+          Change your temporary password
+        </Typography>
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText sx={{ mb: 2 }}>
+          Your admin set an initial password for local testing. Choose a new
+          password before using the directory.
+        </DialogContentText>
+        <Stack spacing={2}>
+          <TextField
+            label="Current temporary password"
             type="password"
             autoComplete="current-password"
+            autoFocus
             value={currentPassword}
             onChange={(event) => setCurrentPassword(event.target.value)}
             required
             disabled={saving}
           />
-        </label>
-
-        <label>
-          <span>New password</span>
-          <input
+          <TextField
+            label="New password"
             type="password"
             autoComplete="new-password"
             value={newPassword}
             onChange={(event) => setNewPassword(event.target.value)}
             required
-            minLength={8}
             disabled={saving}
+            slotProps={{ htmlInput: { minLength: 8 } }}
           />
-        </label>
-
-        <label>
-          <span>Confirm new password</span>
-          <input
+          <TextField
+            label="Confirm new password"
             type="password"
             autoComplete="new-password"
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
             required
-            minLength={8}
             disabled={saving}
+            slotProps={{ htmlInput: { minLength: 8 } }}
           />
-        </label>
-
-        {error ? (
-          <p id={errorId} className="change-password__error" role="alert">
-            {error}
-          </p>
-        ) : null}
-
-        <footer>
-          <button
-            type="button"
-            className="is-secondary"
-            disabled={saving}
-            onClick={() => {
-              void logout()
-            }}
-          >
-            Sign out
-          </button>
-          <button type="submit" disabled={saving}>
-            {saving ? 'Saving…' : 'Save new password'}
-          </button>
-        </footer>
-      </form>
-    </dialog>
+          {error ? (
+            <Alert severity="error" id={errorId}>
+              {error}
+            </Alert>
+          ) : null}
+        </Stack>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button
+          type="button"
+          variant="outlined"
+          disabled={saving}
+          onClick={() => {
+            void logout()
+          }}
+        >
+          Sign out
+        </Button>
+        <Button type="submit" variant="contained" disabled={saving}>
+          {saving ? 'Saving…' : 'Save new password'}
+        </Button>
+      </DialogActions>
+    </Dialog>
   )
 }
 

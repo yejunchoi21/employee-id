@@ -6,6 +6,7 @@ import {
   requireFreshPassword,
 } from '../middleware/requireAuth.js'
 import { Employee } from '../models/index.js'
+import { countActiveAssignmentsForEmployee } from '../services/equipmentService.js'
 import {
   assertDepartmentInCompany,
   DepartmentMembershipError,
@@ -243,6 +244,69 @@ employeesRouter.post(
         employee.approvedAt = undefined
       }
 
+      await employee.save()
+
+      res.json({
+        ok: true,
+        employee: presentEmployee(employee.toObject()),
+      })
+    } catch (error) {
+      next(error)
+    }
+  },
+)
+
+employeesRouter.post(
+  '/api/employees/:employeeId/deactivate',
+  requireAuth,
+  requireFreshPassword,
+  requireAdmin,
+  async (req, res, next) => {
+    try {
+      const membership = req.membership!
+      const employeeId = Array.isArray(req.params.employeeId)
+        ? req.params.employeeId[0]
+        : req.params.employeeId
+
+      if (!employeeId || !Types.ObjectId.isValid(employeeId)) {
+        res.status(400).json({ ok: false, error: 'Invalid employeeId.' })
+        return
+      }
+
+      const employee = await Employee.findOne({
+        _id: employeeId,
+        companyId: membership.companyId,
+      })
+
+      if (!employee) {
+        res.status(404).json({
+          ok: false,
+          error: 'Employee not found in your company.',
+        })
+        return
+      }
+
+      if (employee.approvalStatus === 'inactive') {
+        res.status(409).json({
+          ok: false,
+          error: 'Employee is already inactive.',
+        })
+        return
+      }
+
+      const activeAssignments = await countActiveAssignmentsForEmployee(
+        membership.companyId,
+        employee._id,
+      )
+      if (activeAssignments > 0) {
+        res.status(409).json({
+          ok: false,
+          error: `Cannot deactivate this employee while ${activeAssignments} equipment item${activeAssignments === 1 ? ' is' : 's are'} still assigned. Record returns first.`,
+        })
+        return
+      }
+
+      employee.approvalStatus = 'inactive'
       await employee.save()
 
       res.json({

@@ -1,5 +1,20 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router-dom'
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  List,
+  ListItemButton,
+  Paper,
+  Stack,
+  Tab,
+  Tabs,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { ApiError } from '../api/client'
 import {
   acceptHelpRequest,
@@ -11,8 +26,9 @@ import {
   type HelpRequestDto,
   type HelpRequestStatus,
 } from '../api/helpRequests'
+import PageHeader from '../components/PageHeader'
+import StatusChip from '../components/StatusChip'
 import { useAuth } from '../hooks/useAuth'
-import './RequestsPage.css'
 
 type RequestBox = 'received' | 'sent'
 type StatusFilter = HelpRequestStatus | 'all'
@@ -173,274 +189,311 @@ function RequestsPage() {
 
   if (isAuthLoading) {
     return (
-      <main className="requests-page">
-        <p className="requests-page__status">Checking your session…</p>
-      </main>
+      <Box component="main">
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          <CircularProgress size={18} />
+          <Typography variant="body2">Checking your session…</Typography>
+        </Stack>
+      </Box>
     )
   }
 
   if (!membership) {
     return (
-      <main className="requests-page">
-        <header className="requests-page__hero">
-          <h1>Requests</h1>
-          <p>Sign in from the header to view and manage help requests.</p>
-        </header>
-      </main>
+      <Box component="main">
+        <PageHeader
+          title="Requests"
+          description="Sign in from the header to view and manage help requests."
+        />
+      </Box>
     )
   }
 
+  const switchBox = (next: RequestBox) => {
+    setBox(next)
+    setSelectedId(null)
+    setSelected(null)
+  }
+
   return (
-    <main className="requests-page">
-      <header className="requests-page__hero">
-        <div>
-          <p className="requests-page__eyebrow">Peer support</p>
-          <h1>Requests</h1>
-          <p>
-            Send questions to teammates and respond to requests you receive.
-          </p>
-        </div>
-        <Link to="/directory" className="requests-page__directory-link">
-          Back to directory
-        </Link>
-      </header>
+    <Box component="main">
+      <PageHeader
+        eyebrow="Peer support"
+        title="Requests"
+        description="Send questions to teammates and respond to requests you receive."
+        actions={
+          <Button component={RouterLink} to="/directory" variant="outlined">
+            Back to directory
+          </Button>
+        }
+      />
 
-      <div className="requests-page__tabs" role="tablist" aria-label="Mailbox">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={box === 'received'}
-          className={box === 'received' ? 'is-active' : undefined}
-          onClick={() => {
-            setBox('received')
-            setSelectedId(null)
-            setSelected(null)
-          }}
-        >
-          Received
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={box === 'sent'}
-          className={box === 'sent' ? 'is-active' : undefined}
-          onClick={() => {
-            setBox('sent')
-            setSelectedId(null)
-            setSelected(null)
-          }}
-        >
-          Sent
-        </button>
-      </div>
+      <Tabs
+        value={box}
+        onChange={(_, value: RequestBox) => switchBox(value)}
+        aria-label="Mailbox"
+        sx={{ mb: 1.5 }}
+      >
+        <Tab value="received" label="Received" />
+        <Tab value="sent" label="Sent" />
+      </Tabs>
 
-      <div className="requests-page__filters" aria-label="Status filters">
+      <Stack
+        direction="row"
+        useFlexGap
+        spacing={1}
+        aria-label="Status filters"
+        role="group"
+        sx={{ mb: 2, flexWrap: 'wrap' }}
+      >
         {statusFilters.map((filter) => (
-          <button
+          <Chip
             key={filter.value}
-            type="button"
-            className={status === filter.value ? 'is-active' : undefined}
+            label={filter.label}
+            clickable
+            color={status === filter.value ? 'primary' : 'default'}
+            variant={status === filter.value ? 'filled' : 'outlined'}
+            aria-pressed={status === filter.value}
             onClick={() => setStatus(filter.value)}
-          >
-            {filter.label}
-          </button>
+          />
         ))}
-      </div>
+      </Stack>
 
-      <div className="requests-page__layout">
-        <section className="requests-page__list" aria-label="Request list">
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        spacing={2}
+        sx={{ alignItems: 'flex-start' }}
+      >
+        <Box
+          component="section"
+          aria-label="Request list"
+          sx={{ width: { xs: '100%', md: 340 }, flexShrink: 0 }}
+        >
           {loadingList ? (
-            <p className="requests-page__status">Loading requests…</p>
+            <Stack direction="row" spacing={1} sx={{ mb: 1, alignItems: 'center' }}>
+              <CircularProgress size={18} />
+              <Typography variant="body2">Loading requests…</Typography>
+            </Stack>
           ) : null}
           {listError ? (
-            <p className="requests-page__error" role="alert">
+            <Alert severity="error" sx={{ mb: 1 }}>
               {listError}
-            </p>
+            </Alert>
           ) : null}
           {!loadingList && !listError && requests.length === 0 ? (
-            <p className="requests-page__status">No requests in this view.</p>
+            <Paper sx={{ p: 3, textAlign: 'center' }}>
+              <Typography variant="subtitle1">Nothing here</Typography>
+              <Typography variant="body2">No requests in this view.</Typography>
+            </Paper>
           ) : null}
-          <ul>
-            {requests.map((request) => (
-              <li key={request.id}>
-                <button
-                  type="button"
-                  className={
-                    selectedId === request.id
-                      ? 'requests-page__item is-selected'
-                      : 'requests-page__item'
-                  }
-                  onClick={() => setSelectedId(request.id)}
-                >
-                  <span
-                    className={`requests-page__badge requests-page__badge--${request.status}`}
+          {requests.length > 0 ? (
+            <Paper>
+              <List disablePadding>
+                {requests.map((request) => (
+                  <ListItemButton
+                    key={request.id}
+                    selected={selectedId === request.id}
+                    onClick={() => setSelectedId(request.id)}
+                    sx={{ display: 'block' }}
                   >
-                    {statusLabel(request.status)}
-                  </span>
-                  <strong>{request.subject}</strong>
-                  <span>
-                    {box === 'received'
-                      ? `From ${request.senderName ?? 'teammate'}`
-                      : `To ${request.recipientName ?? 'teammate'}`}
-                  </span>
-                  <time dateTime={request.createdAt ?? undefined}>
-                    {formatWhen(request.createdAt)}
-                  </time>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
+                    <StatusChip
+                      status={request.status}
+                      label={statusLabel(request.status)}
+                    />
+                    <Typography variant="subtitle1" sx={{ mt: 0.5 }}>
+                      {request.subject}
+                    </Typography>
+                    <Typography variant="body2" component="div">
+                      {box === 'received'
+                        ? `From ${request.senderName ?? 'teammate'}`
+                        : `To ${request.recipientName ?? 'teammate'}`}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      component="time"
+                      dateTime={request.createdAt ?? undefined}
+                      sx={{ display: 'block' }}
+                    >
+                      {formatWhen(request.createdAt)}
+                    </Typography>
+                  </ListItemButton>
+                ))}
+              </List>
+            </Paper>
+          ) : null}
+        </Box>
 
-        <section className="requests-page__detail" aria-live="polite">
+        <Box
+          component="section"
+          aria-live="polite"
+          sx={{ flex: 1, minWidth: 0, width: '100%' }}
+        >
           {!selectedId ? (
-            <p className="requests-page__status">
-              Select a request to see details and available actions.
-            </p>
+            <Paper sx={{ p: 3, textAlign: 'center' }}>
+              <Typography variant="body2">
+                Select a request to see details and available actions.
+              </Typography>
+            </Paper>
           ) : null}
           {loadingDetail ? (
-            <p className="requests-page__status">Loading details…</p>
+            <Stack direction="row" spacing={1} sx={{ mb: 1, alignItems: 'center' }}>
+              <CircularProgress size={18} />
+              <Typography variant="body2">Loading details…</Typography>
+            </Stack>
           ) : null}
           {detailError ? (
-            <p className="requests-page__error" role="alert">
+            <Alert severity="error" sx={{ mb: 1 }}>
               {detailError}
-            </p>
+            </Alert>
           ) : null}
           {selectedForView && !loadingDetail ? (
-            <article className="requests-page__card">
-              <header>
-                <span
-                  className={`requests-page__badge requests-page__badge--${selectedForView.status}`}
-                >
-                  {statusLabel(selectedForView.status)}
-                </span>
-                <h2>{selectedForView.subject}</h2>
-                <p>
-                  {selectedForView.priority.charAt(0).toUpperCase() +
-                    selectedForView.priority.slice(1)}{' '}
-                  priority · {formatWhen(selectedForView.createdAt)}
-                </p>
-              </header>
+            <Paper component="article" sx={{ p: 2 }}>
+              <Stack spacing={2}>
+                <Box>
+                  <StatusChip
+                    status={selectedForView.status}
+                    label={statusLabel(selectedForView.status)}
+                  />
+                  <Typography variant="h2" sx={{ mt: 1 }}>
+                    {selectedForView.subject}
+                  </Typography>
+                  <Typography variant="body2">
+                    {selectedForView.priority.charAt(0).toUpperCase() +
+                      selectedForView.priority.slice(1)}{' '}
+                    priority · {formatWhen(selectedForView.createdAt)}
+                  </Typography>
+                </Box>
 
-              <dl>
-                <div>
-                  <dt>From</dt>
-                  <dd>
-                    {selectedForView.senderName ?? 'Unknown'} (
-                    {selectedForView.senderEmail ?? 'n/a'})
-                  </dd>
-                </div>
-                <div>
-                  <dt>To</dt>
-                  <dd>
-                    {selectedForView.recipientName ?? 'Unknown'} (
-                    {selectedForView.recipientEmail ?? 'n/a'})
-                  </dd>
-                </div>
-              </dl>
+                <Stack spacing={1} component="dl" sx={{ m: 0 }}>
+                  <Box>
+                    <Typography variant="overline" color="text.secondary" component="dt">
+                      From
+                    </Typography>
+                    <Typography variant="body1" component="dd" sx={{ m: 0 }}>
+                      {selectedForView.senderName ?? 'Unknown'} (
+                      {selectedForView.senderEmail ?? 'n/a'})
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="overline" color="text.secondary" component="dt">
+                      To
+                    </Typography>
+                    <Typography variant="body1" component="dd" sx={{ m: 0 }}>
+                      {selectedForView.recipientName ?? 'Unknown'} (
+                      {selectedForView.recipientEmail ?? 'n/a'})
+                    </Typography>
+                  </Box>
+                </Stack>
 
-              <section>
-                <h3>Question</h3>
-                <p>{selectedForView.question}</p>
-              </section>
+                <Box component="section">
+                  <Typography variant="h3" component="h3">
+                    Question
+                  </Typography>
+                  <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                    {selectedForView.question}
+                  </Typography>
+                </Box>
 
-              {selectedForView.response ? (
-                <section>
-                  <h3>Response</h3>
-                  <p>{selectedForView.response}</p>
-                </section>
-              ) : null}
+                {selectedForView.response ? (
+                  <Box component="section">
+                    <Typography variant="h3" component="h3">
+                      Response
+                    </Typography>
+                    <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                      {selectedForView.response}
+                    </Typography>
+                  </Box>
+                ) : null}
 
-              {isRecipient && selectedForView.status === 'open' ? (
-                <label className="requests-page__response">
-                  <span>Optional response</span>
-                  <textarea
+                {isRecipient && selectedForView.status === 'open' ? (
+                  <TextField
+                    label="Optional response"
                     value={responseText}
                     onChange={(event) => setResponseText(event.target.value)}
-                    rows={3}
-                    maxLength={4000}
+                    multiline
+                    minRows={3}
                     disabled={Boolean(savingAction)}
+                    slotProps={{ htmlInput: { maxLength: 4000 } }}
                   />
-                </label>
-              ) : null}
+                ) : null}
 
-              {actionError ? (
-                <p className="requests-page__error" role="alert">
-                  {actionError}
-                </p>
-              ) : null}
+                {actionError ? <Alert severity="error">{actionError}</Alert> : null}
 
-              <div className="requests-page__actions">
-                {isRecipient && selectedForView.status === 'open' ? (
-                  <>
-                    <button
+                <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
+                  {isRecipient && selectedForView.status === 'open' ? (
+                    <>
+                      <Button
+                        type="button"
+                        variant="contained"
+                        disabled={Boolean(savingAction)}
+                        onClick={() =>
+                          void runAction('accept', () =>
+                            acceptHelpRequest(
+                              selectedForView.id,
+                              responseText.trim() || undefined,
+                            ),
+                          )
+                        }
+                      >
+                        {savingAction === 'accept' ? 'Accepting…' : 'Accept'}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outlined"
+                        disabled={Boolean(savingAction)}
+                        onClick={() =>
+                          void runAction('decline', () =>
+                            declineHelpRequest(
+                              selectedForView.id,
+                              responseText.trim() || undefined,
+                            ),
+                          )
+                        }
+                      >
+                        {savingAction === 'decline' ? 'Declining…' : 'Decline'}
+                      </Button>
+                    </>
+                  ) : null}
+
+                  {isSender && selectedForView.status === 'open' ? (
+                    <Button
                       type="button"
+                      variant="outlined"
                       disabled={Boolean(savingAction)}
                       onClick={() =>
-                        void runAction('accept', () =>
-                          acceptHelpRequest(
-                            selectedForView.id,
-                            responseText.trim() || undefined,
-                          ),
+                        void runAction('cancel', () =>
+                          cancelHelpRequest(selectedForView.id),
                         )
                       }
                     >
-                      {savingAction === 'accept' ? 'Accepting…' : 'Accept'}
-                    </button>
-                    <button
+                      {savingAction === 'cancel' ? 'Cancelling…' : 'Cancel request'}
+                    </Button>
+                  ) : null}
+
+                  {isSender && selectedForView.status === 'accepted' ? (
+                    <Button
                       type="button"
-                      className="is-secondary"
+                      variant="contained"
                       disabled={Boolean(savingAction)}
                       onClick={() =>
-                        void runAction('decline', () =>
-                          declineHelpRequest(
-                            selectedForView.id,
-                            responseText.trim() || undefined,
-                          ),
+                        void runAction('resolve', () =>
+                          resolveHelpRequest(selectedForView.id),
                         )
                       }
                     >
-                      {savingAction === 'decline' ? 'Declining…' : 'Decline'}
-                    </button>
-                  </>
-                ) : null}
-
-                {isSender && selectedForView.status === 'open' ? (
-                  <button
-                    type="button"
-                    className="is-secondary"
-                    disabled={Boolean(savingAction)}
-                    onClick={() =>
-                      void runAction('cancel', () =>
-                        cancelHelpRequest(selectedForView.id),
-                      )
-                    }
-                  >
-                    {savingAction === 'cancel' ? 'Cancelling…' : 'Cancel request'}
-                  </button>
-                ) : null}
-
-                {isSender && selectedForView.status === 'accepted' ? (
-                  <button
-                    type="button"
-                    disabled={Boolean(savingAction)}
-                    onClick={() =>
-                      void runAction('resolve', () =>
-                        resolveHelpRequest(selectedForView.id),
-                      )
-                    }
-                  >
-                    {savingAction === 'resolve'
-                      ? 'Resolving…'
-                      : 'Mark resolved'}
-                  </button>
-                ) : null}
-              </div>
-            </article>
+                      {savingAction === 'resolve'
+                        ? 'Resolving…'
+                        : 'Mark resolved'}
+                    </Button>
+                  ) : null}
+                </Stack>
+              </Stack>
+            </Paper>
           ) : null}
-        </section>
-      </div>
-    </main>
+        </Box>
+      </Stack>
+    </Box>
   )
 }
 

@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import { Box, Link, Typography } from '@mui/material'
 import EmployeeSignupForm from '../components/EmployeeSignupForm'
+import PageHeader from '../components/PageHeader'
 import { useEmployeeDirectory } from '../hooks/useEmployeeDirectory'
 import type { EmployeeSignupInput } from '../utils/createEmployee'
 
@@ -28,25 +30,23 @@ function SignupPage() {
   }
 
   return (
-    <main className="page">
-      <div className="page__hero">
-        <p className="page__kicker">New hire badge</p>
-        <h1 ref={headingRef} className="page__heading" tabIndex={-1}>
-          Create your employee card
-        </h1>
-        <p className="page__lede">
-          Fill in your details, upload a portrait, and drop your badge onto the
-          Northline rack.
-        </p>
-      </div>
+    <Box component="main">
+      <PageHeader
+        eyebrow="New hire badge"
+        title="Create your employee card"
+        description="Fill in your details, upload a portrait, and drop your badge onto the Northline rack."
+        titleRef={headingRef}
+      />
 
       <EmployeeSignupForm onSubmit={handleSubmit} submitLabel="Create my card" />
 
-      <p className="page__footer-note">
+      <Typography variant="body2" sx={{ mt: 2 }}>
         Already on the roster?{' '}
-        <Link to="/directory">Open the directory</Link>
-      </p>
-    </main>
+        <Link component={RouterLink} to="/directory">
+          Open the directory
+        </Link>
+      </Typography>
+    </Box>
   )
 }
 

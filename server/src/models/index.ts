@@ -25,3 +25,23 @@ export {
   type OnboardingPlanDocument,
   type OnboardingTaskDocument,
 } from './OnboardingPlan.js'
+export {
+  EquipmentItem,
+  equipmentCategories,
+  equipmentItemStatuses,
+  type EquipmentCategory,
+  type EquipmentItemDocument,
+  type EquipmentItemStatus,
+} from './EquipmentItem.js'
+export {
+  EquipmentRequest,
+  equipmentRequestStatuses,
+  type EquipmentRequestDocument,
+  type EquipmentRequestStatus,
+} from './EquipmentRequest.js'
+export {
+  EquipmentAssignment,
+  equipmentReturnConditions,
+  type EquipmentAssignmentDocument,
+  type EquipmentReturnCondition,
+} from './EquipmentAssignment.js'

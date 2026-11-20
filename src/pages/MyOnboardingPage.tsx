@@ -1,13 +1,22 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router-dom'
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { ApiError } from '../api/client'
 import {
   fetchOnboardingPlans,
   type OnboardingPlanDto,
 } from '../api/onboarding'
 import OnboardingPlanPanel from '../components/OnboardingPlanPanel'
+import PageHeader from '../components/PageHeader'
 import { useAuth } from '../hooks/useAuth'
-import './OnboardingPages.css'
 
 function MyOnboardingPage() {
   const { membership, isAuthLoading } = useAuth()
@@ -46,49 +55,57 @@ function MyOnboardingPage() {
 
   if (isAuthLoading) {
     return (
-      <main className="onboarding-page">
-        <p className="onboarding-page__status">Checking your session…</p>
-      </main>
+      <Box component="main">
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          <CircularProgress size={18} />
+          <Typography variant="body2">Checking your session…</Typography>
+        </Stack>
+      </Box>
     )
   }
 
   if (!membership) {
     return (
-      <main className="onboarding-page">
-        <header className="onboarding-page__hero">
-          <h1>My onboarding</h1>
-          <p>Sign in to view your onboarding checklist.</p>
-        </header>
-      </main>
+      <Box component="main">
+        <PageHeader
+          title="My onboarding"
+          description="Sign in to view your onboarding checklist."
+        />
+      </Box>
     )
   }
 
   return (
-    <main className="onboarding-page">
-      <header className="onboarding-page__hero">
-        <div>
-          <p className="onboarding-page__eyebrow">New hire</p>
-          <h1>My onboarding</h1>
-          <p>
-            Track your checklist, due dates, buddy, and key contacts. Complete
-            only the tasks assigned to you.
-          </p>
-        </div>
-        <Link to="/directory">Back to directory</Link>
-      </header>
+    <Box component="main">
+      <PageHeader
+        eyebrow="New hire"
+        title="My onboarding"
+        description="Track your checklist, due dates, buddy, and key contacts. Complete only the tasks assigned to you."
+        actions={
+          <Button component={RouterLink} to="/directory" variant="outlined">
+            Back to directory
+          </Button>
+        }
+      />
 
       {loading ? (
-        <p className="onboarding-page__status">Loading your plan…</p>
+        <Stack direction="row" spacing={1} sx={{ mb: 2, alignItems: 'center' }}>
+          <CircularProgress size={18} />
+          <Typography variant="body2">Loading your plan…</Typography>
+        </Stack>
       ) : null}
       {error ? (
-        <p className="onboarding-page__error" role="alert">
+        <Alert severity="error" sx={{ mb: 2 }}>
           {error}
-        </p>
+        </Alert>
       ) : null}
       {!loading && !error && !plan ? (
-        <p className="onboarding-page__status">
-          No onboarding plan has been assigned to your employee profile yet.
-        </p>
+        <Paper sx={{ p: 3, textAlign: 'center' }}>
+          <Typography variant="subtitle1">No onboarding plan yet</Typography>
+          <Typography variant="body2">
+            No onboarding plan has been assigned to your employee profile yet.
+          </Typography>
+        </Paper>
       ) : null}
       {plan ? (
         <OnboardingPlanPanel
@@ -97,7 +114,7 @@ function MyOnboardingPage() {
           onPlanChange={setPlan}
         />
       ) : null}
-    </main>
+    </Box>
   )
 }
 

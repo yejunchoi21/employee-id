@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
+import { Box, Button, Typography } from '@mui/material'
 import DirectoryControls from '../components/DirectoryControls'
 import DirectoryEmptyState from '../components/DirectoryEmptyState'
 import EmployeeCarousel from '../components/EmployeeCarousel'
@@ -7,6 +8,7 @@ import EmployeeEditDialog from '../components/EmployeeEditDialog'
 import EmployeeGrid from '../components/EmployeeGrid'
 import EmployeeList from '../components/EmployeeList'
 import EmployeeProfileDialog from '../components/EmployeeProfileDialog'
+import PageHeader from '../components/PageHeader'
 import RequestHelpDialog from '../components/RequestHelpDialog'
 import { useAuth } from '../hooks/useAuth'
 import { useEmployeeDirectory } from '../hooks/useEmployeeDirectory'
@@ -206,29 +208,24 @@ function DirectoryPage() {
   }, [])
 
   return (
-    <main className="page">
-      <div className="page__hero">
-        <p className="page__kicker">Staff roster</p>
-        <h1 ref={headingRef} className="page__heading" tabIndex={-1}>
-          Employee Directory
-        </h1>
-        <p className="page__lede">
-          Search by expertise, switch between cards, grid, or list, and open a
-          profile to email or copy contact details.
-        </p>
-        <div className="page__actions">
-          <Link className="page__button" to="/signup">
+    <Box component="main">
+      <PageHeader
+        eyebrow="Staff roster"
+        title="Employee Directory"
+        description="Search by expertise, switch between cards, grid, or list, and open a profile to email or copy contact details."
+        titleRef={headingRef}
+        actions={
+          <Button component={RouterLink} to="/signup" variant="contained">
             Add employee
-          </Link>
-        </div>
-        {hasDemoProfiles ? (
-          <p className="page__footer-note">
-            Demo profiles are labeled and fictional. Your saved cards stay in
-            this browser and are never overwritten.
-          </p>
-        ) : null}
-      </div>
-
+          </Button>
+        }
+      />
+      {hasDemoProfiles ? (
+        <Typography variant="body2" sx={{ mb: 2 }}>
+          Demo profiles are labeled and fictional. Your saved cards stay in this
+          browser and are never overwritten.
+        </Typography>
+      ) : null}
       <DirectoryControls
         search={search}
         department={department}
@@ -305,7 +302,7 @@ function DirectoryPage() {
         onSave={handleEditSave}
         onDelete={handleEditDelete}
       />
-    </main>
+    </Box>
   )
 }
 

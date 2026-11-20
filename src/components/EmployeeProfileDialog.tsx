@@ -1,8 +1,21 @@
-import { useEffect, useId, useRef } from 'react'
+import { useId, type ReactNode } from 'react'
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Link,
+  Stack,
+  Typography,
+} from '@mui/material'
 import type { Employee } from '../data/employee'
 import { optionalText } from '../utils/displayField'
 import EmployeeContactActions from './EmployeeContactActions'
-import './EmployeeProfileDialog.css'
 
 interface EmployeeProfileDialogProps {
   employee: Employee | null
@@ -27,10 +40,33 @@ function DetailRow({
 }) {
   if (!value) return null
   return (
-    <div>
-      <dt>{label}</dt>
-      <dd>{value}</dd>
-    </div>
+    <Box>
+      <Typography variant="overline" color="text.secondary" component="dt">
+        {label}
+      </Typography>
+      <Typography variant="body1" component="dd" sx={{ m: 0 }}>
+        {value}
+      </Typography>
+    </Box>
+  )
+}
+
+function ProfileSection({
+  label,
+  heading,
+  children,
+}: {
+  label: string
+  heading: string
+  children: ReactNode
+}) {
+  return (
+    <Box component="section" aria-label={label}>
+      <Typography variant="h4" component="h4" sx={{ mb: 0.5 }}>
+        {heading}
+      </Typography>
+      {children}
+    </Box>
   )
 }
 
@@ -43,62 +79,8 @@ function EmployeeProfileDialog({
   onDelete,
   onRequestHelp,
 }: EmployeeProfileDialogProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null)
-  const closeButtonRef = useRef<HTMLButtonElement>(null)
   const titleId = useId()
   const descriptionId = useId()
-
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-
-    const handleClose = () => {
-      document.body.classList.remove('profile-open')
-      onClose()
-    }
-
-    const handleCancel = (event: Event) => {
-      event.preventDefault()
-      dialog.close()
-    }
-
-    dialog.addEventListener('close', handleClose)
-    dialog.addEventListener('cancel', handleCancel)
-    return () => {
-      dialog.removeEventListener('close', handleClose)
-      dialog.removeEventListener('cancel', handleCancel)
-    }
-  }, [onClose])
-
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-
-    if (employee) {
-      if (!dialog.open) {
-        dialog.showModal()
-      }
-      document.body.classList.add('profile-open')
-      window.requestAnimationFrame(() => {
-        closeButtonRef.current?.focus()
-      })
-      return
-    }
-
-    if (dialog.open) {
-      dialog.close()
-    }
-  }, [employee])
-
-  useEffect(() => {
-    return () => {
-      document.body.classList.remove('profile-open')
-    }
-  }, [])
-
-  const requestClose = () => {
-    dialogRef.current?.close()
-  }
 
   const phone = optionalText(employee?.phone)
   const office = optionalText(employee?.office)
@@ -110,157 +92,165 @@ function EmployeeProfileDialog({
   const email = optionalText(employee?.email)
 
   return (
-    <dialog
-      ref={dialogRef}
-      className="employee-profile"
+    <Dialog
+      open={Boolean(employee)}
+      onClose={onClose}
+      scroll="paper"
+      fullWidth
+      maxWidth="sm"
       aria-labelledby={titleId}
       aria-describedby={descriptionId}
-      onClick={(event) => {
-        if (event.target === dialogRef.current) {
-          requestClose()
-        }
-      }}
+      transitionDuration={{ enter: 150, exit: 0 }}
     >
       {employee ? (
-        <div
-          className="employee-profile__sheet"
-          onClick={(event) => event.stopPropagation()}
-        >
-          <header className="employee-profile__header">
-            <div>
-              <p className="employee-profile__eyebrow">{employee.company}</p>
-              <h2 id={titleId} className="employee-profile__title">
-                Employee profile
-              </h2>
-              {employee.isDemo ? (
-                <p className="employee-profile__demo-banner">
-                  Fictional demo profile for browsing the directory
-                </p>
+        <>
+          <DialogTitle component="div" sx={{ pb: 1 }}>
+            <Typography variant="overline" color="primary" sx={{ display: 'block' }}>
+              {employee.company}
+            </Typography>
+            <Typography variant="h2" id={titleId}>
+              Employee profile
+            </Typography>
+            {employee.isDemo ? (
+              <Alert severity="info" sx={{ mt: 1 }}>
+                Fictional demo profile for browsing the directory
+              </Alert>
+            ) : null}
+          </DialogTitle>
+
+          <DialogContent dividers>
+            <Stack spacing={2}>
+              <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+                <Avatar
+                  variant="rounded"
+                  src={employee.photoUrl}
+                  alt={`Portrait of ${employee.name}`}
+                  sx={{ width: 96, height: 96, flexShrink: 0 }}
+                />
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="h3" component="h3">
+                    {employee.name}
+                  </Typography>
+                  <Typography variant="body1" id={descriptionId}>
+                    {employee.title}
+                  </Typography>
+                  <Typography variant="body2">
+                    {employee.department} · {employee.id}
+                  </Typography>
+                </Box>
+              </Stack>
+
+              <EmployeeContactActions employee={employee} />
+
+              <Box
+                component="dl"
+                sx={{
+                  m: 0,
+                  display: 'grid',
+                  gap: 1.5,
+                  gridTemplateColumns: {
+                    xs: '1fr',
+                    sm: 'repeat(2, minmax(0, 1fr))',
+                  },
+                }}
+              >
+                {email ? (
+                  <Box>
+                    <Typography variant="overline" color="text.secondary" component="dt">
+                      Work email
+                    </Typography>
+                    <Typography variant="body1" component="dd" sx={{ m: 0 }}>
+                      <Link href={`mailto:${email}`}>{email}</Link>
+                    </Typography>
+                  </Box>
+                ) : null}
+                {phone ? (
+                  <Box>
+                    <Typography variant="overline" color="text.secondary" component="dt">
+                      Work phone
+                    </Typography>
+                    <Typography variant="body1" component="dd" sx={{ m: 0 }}>
+                      <Link href={phoneHref(phone)}>{phone}</Link>
+                    </Typography>
+                  </Box>
+                ) : null}
+                <DetailRow label="Office" value={office} />
+                <DetailRow label="Time zone" value={timeZone} />
+                <DetailRow label="Manager" value={manager} />
+                <DetailRow label="Joined" value={joined} />
+              </Box>
+
+              {askMeAbout ? (
+                <ProfileSection label="Ask me about" heading="Ask me about">
+                  <Typography variant="body1">{askMeAbout}</Typography>
+                </ProfileSection>
               ) : null}
-            </div>
-            <div className="employee-profile__header-actions">
-              {canRequestHelp ? (
-                <button
+
+              {bio ? (
+                <ProfileSection label="Biography" heading="Bio">
+                  <Typography variant="body1">{bio}</Typography>
+                </ProfileSection>
+              ) : null}
+
+              {employee.skills.length > 0 ? (
+                <ProfileSection label="Skills" heading="Skills">
+                  <Stack
+                    component="ul"
+                    direction="row"
+                    spacing={0.5}
+                    useFlexGap
+                    sx={{ listStyle: 'none', m: 0, p: 0, flexWrap: 'wrap' }}
+                  >
+                    {employee.skills.map((skill) => (
+                      <li key={skill}>
+                        <Chip size="small" label={skill} />
+                      </li>
+                    ))}
+                  </Stack>
+                </ProfileSection>
+              ) : null}
+            </Stack>
+          </DialogContent>
+
+          <DialogActions sx={{ px: 3, py: 1.5, flexWrap: 'wrap', gap: 1 }}>
+            {canRequestHelp ? (
+              <Button
+                type="button"
+                variant="contained"
+                onClick={() => onRequestHelp?.(employee)}
+              >
+                Request help
+              </Button>
+            ) : null}
+            {canEdit ? (
+              <>
+                <Button
                   type="button"
-                  className="employee-profile__help"
+                  variant="outlined"
                   onClick={() => {
-                    if (!employee) return
-                    onRequestHelp?.(employee)
+                    onClose()
+                    window.requestAnimationFrame(() => onEdit?.(employee))
                   }}
                 >
-                  Request help
-                </button>
-              ) : null}
-              {canEdit ? (
-                <>
-                  <button
-                    type="button"
-                    className="employee-profile__edit"
-                    onClick={() => {
-                      if (!employee) return
-                      requestClose()
-                      window.requestAnimationFrame(() => onEdit?.(employee))
-                    }}
-                  >
-                    Edit my card
-                  </button>
-                  <button
-                    type="button"
-                    className="employee-profile__delete"
-                    onClick={() => {
-                      if (!employee) return
-                      onDelete?.(employee)
-                    }}
-                  >
-                    Delete
-                  </button>
-                </>
-              ) : null}
-              <button
-                ref={closeButtonRef}
-                type="button"
-                className="employee-profile__close"
-                onClick={requestClose}
-              >
-                Close
-              </button>
-            </div>
-          </header>
-
-          <div className="employee-profile__content">
-            <div className="employee-profile__hero">
-              <img
-                className="employee-profile__photo"
-                src={employee.photoUrl}
-                alt={`Portrait of ${employee.name}`}
-              />
-              <div className="employee-profile__identity">
-                <h3 className="employee-profile__name">{employee.name}</h3>
-                <p id={descriptionId} className="employee-profile__role">
-                  {employee.title}
-                </p>
-                <p className="employee-profile__meta">
-                  {employee.department} · {employee.id}
-                </p>
-              </div>
-            </div>
-
-            <EmployeeContactActions employee={employee} />
-
-            <dl className="employee-profile__details">
-              {email ? (
-                <div>
-                  <dt>Work email</dt>
-                  <dd>
-                    <a href={`mailto:${email}`}>{email}</a>
-                  </dd>
-                </div>
-              ) : null}
-              {phone ? (
-                <div>
-                  <dt>Work phone</dt>
-                  <dd>
-                    <a href={phoneHref(phone)}>{phone}</a>
-                  </dd>
-                </div>
-              ) : null}
-              <DetailRow label="Office" value={office} />
-              <DetailRow label="Time zone" value={timeZone} />
-              <DetailRow label="Manager" value={manager} />
-              <DetailRow label="Joined" value={joined} />
-            </dl>
-
-            {askMeAbout ? (
-              <section
-                className="employee-profile__section"
-                aria-label="Ask me about"
-              >
-                <h4>Ask me about</h4>
-                <p>{askMeAbout}</p>
-              </section>
+                  Edit my card
+                </Button>
+                <Button
+                  type="button"
+                  variant="outlined"
+                  color="error"
+                  onClick={() => onDelete?.(employee)}
+                >
+                  Delete
+                </Button>
+              </>
             ) : null}
-
-            {bio ? (
-              <section className="employee-profile__section" aria-label="Biography">
-                <h4>Bio</h4>
-                <p>{bio}</p>
-              </section>
-            ) : null}
-
-            {employee.skills.length > 0 ? (
-              <section className="employee-profile__section" aria-label="Skills">
-                <h4>Skills</h4>
-                <ul className="employee-profile__skills">
-                  {employee.skills.map((skill) => (
-                    <li key={skill}>{skill}</li>
-                  ))}
-                </ul>
-              </section>
-            ) : null}
-          </div>
-        </div>
+            <Button type="button" onClick={onClose} autoFocus>
+              Close
+            </Button>
+          </DialogActions>
+        </>
       ) : null}
-    </dialog>
+    </Dialog>
   )
 }
 

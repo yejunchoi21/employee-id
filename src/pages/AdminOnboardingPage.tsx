@@ -1,5 +1,25 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Link as RouterLink, Navigate } from 'react-router-dom'
+import {
+  Alert,
+  Box,
+  Button,
+  Checkbox,
+  CircularProgress,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  FormLabel,
+  LinearProgress,
+  List,
+  ListItemButton,
+  ListItemText,
+  MenuItem,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { ApiError } from '../api/client'
 import { fetchPublishedEmployees } from '../api/helpRequests'
 import {
@@ -9,8 +29,8 @@ import {
   type OnboardingPlanDto,
 } from '../api/onboarding'
 import OnboardingPlanPanel from '../components/OnboardingPlanPanel'
+import PageHeader from '../components/PageHeader'
 import { useAuth } from '../hooks/useAuth'
-import './OnboardingPages.css'
 
 interface EmployeeOption {
   id: string
@@ -94,29 +114,32 @@ function AdminOnboardingPage() {
   const employeeOptions = useMemo(
     () =>
       employees.map((employee) => (
-        <option key={employee.id} value={employee.id}>
+        <MenuItem key={employee.id} value={employee.id}>
           {employee.name} · {employee.title}
-        </option>
+        </MenuItem>
       )),
     [employees],
   )
 
   if (isAuthLoading) {
     return (
-      <main className="onboarding-page">
-        <p className="onboarding-page__status">Checking your session…</p>
-      </main>
+      <Box component="main">
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          <CircularProgress size={18} />
+          <Typography variant="body2">Checking your session…</Typography>
+        </Stack>
+      </Box>
     )
   }
 
   if (!membership) {
     return (
-      <main className="onboarding-page">
-        <header className="onboarding-page__hero">
-          <h1>Onboarding admin</h1>
-          <p>Sign in as an admin to create onboarding plans.</p>
-        </header>
-      </main>
+      <Box component="main">
+        <PageHeader
+          title="Onboarding admin"
+          description="Sign in as an admin to create onboarding plans."
+        />
+      </Box>
     )
   }
 
@@ -163,127 +186,147 @@ function AdminOnboardingPage() {
   }
 
   return (
-    <main className="onboarding-page">
-      <header className="onboarding-page__hero">
-        <div>
-          <p className="onboarding-page__eyebrow">Admin</p>
-          <h1>Onboarding plans</h1>
-          <p>
-            Create a plan for an active employee. Default checklist tasks are
-            copied into the plan so later edits stay local.
-          </p>
-        </div>
-        <Link to="/directory">Back to directory</Link>
-      </header>
+    <Box component="main">
+      <PageHeader
+        eyebrow="Admin"
+        title="Onboarding plans"
+        description="Create a plan for an active employee. Default checklist tasks are copied into the plan so later edits stay local."
+        actions={
+          <Button component={RouterLink} to="/directory" variant="outlined">
+            Back to directory
+          </Button>
+        }
+      />
 
       {loading ? (
-        <p className="onboarding-page__status">Loading admin tools…</p>
+        <Stack direction="row" spacing={1} sx={{ mb: 2, alignItems: 'center' }}>
+          <CircularProgress size={18} />
+          <Typography variant="body2">Loading admin tools…</Typography>
+        </Stack>
       ) : null}
       {error ? (
-        <p className="onboarding-page__error" role="alert">
+        <Alert severity="error" sx={{ mb: 2 }}>
           {error}
-        </p>
+        </Alert>
       ) : null}
       {success ? (
-        <p className="onboarding-page__success" role="status">
+        <Alert severity="success" sx={{ mb: 2 }}>
           {success}
-        </p>
+        </Alert>
       ) : null}
 
-      <form
-        className="onboarding-page__form"
+      <Paper
+        component="form"
         onSubmit={(event) => {
           void handleCreate(event)
         }}
+        sx={{ p: 2, mb: 2 }}
       >
-        <fieldset disabled={saving || loading}>
-          <legend>Create plan</legend>
-          <label>
-            <span>New hire</span>
-            <select
-              value={employeeId}
-              onChange={(event) => setEmployeeId(event.target.value)}
-              required
-            >
-              {employeeOptions}
-            </select>
-          </label>
-          <label>
-            <span>Manager</span>
-            <select
-              value={managerEmployeeId}
-              onChange={(event) => setManagerEmployeeId(event.target.value)}
-              required
-            >
-              {employeeOptions}
-            </select>
-          </label>
-          <label>
-            <span>Buddy (optional)</span>
-            <select
-              value={buddyEmployeeId}
-              onChange={(event) => setBuddyEmployeeId(event.target.value)}
-            >
-              <option value="">None</option>
-              {employeeOptions}
-            </select>
-          </label>
-          <label>
-            <span>Start date</span>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(event) => setStartDate(event.target.value)}
-              required
-            />
-          </label>
-          <fieldset className="onboarding-page__contacts">
-            <legend>Key contacts</legend>
-            {employees.map((employee) => (
-              <label key={employee.id} className="onboarding-page__check">
-                <input
-                  type="checkbox"
-                  checked={keyContactEmployeeIds.includes(employee.id)}
-                  onChange={() => toggleContact(employee.id)}
+        <Stack
+          component="fieldset"
+          spacing={2}
+          disabled={saving || loading}
+          sx={{ border: 0, m: 0, p: 0, minWidth: 0 }}
+        >
+          <Typography variant="subtitle1" component="legend" sx={{ mb: 1.5, p: 0 }}>
+            Create plan
+          </Typography>
+          <TextField
+            select
+            label="New hire"
+            value={employeeId}
+            onChange={(event) => setEmployeeId(event.target.value)}
+            required
+          >
+            {employeeOptions}
+          </TextField>
+          <TextField
+            select
+            label="Manager"
+            value={managerEmployeeId}
+            onChange={(event) => setManagerEmployeeId(event.target.value)}
+            required
+          >
+            {employeeOptions}
+          </TextField>
+          <TextField
+            select
+            label="Buddy (optional)"
+            value={buddyEmployeeId}
+            onChange={(event) => setBuddyEmployeeId(event.target.value)}
+          >
+            <MenuItem value="">None</MenuItem>
+            {employeeOptions}
+          </TextField>
+          <TextField
+            label="Start date"
+            type="date"
+            value={startDate}
+            onChange={(event) => setStartDate(event.target.value)}
+            required
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+          <FormControl component="fieldset" variant="standard">
+            <FormLabel component="legend">Key contacts</FormLabel>
+            <FormGroup sx={{ maxHeight: 220, overflowY: 'auto', flexWrap: 'nowrap' }}>
+              {employees.map((employee) => (
+                <FormControlLabel
+                  key={employee.id}
+                  label={employee.name}
+                  control={
+                    <Checkbox
+                      size="small"
+                      checked={keyContactEmployeeIds.includes(employee.id)}
+                      onChange={() => toggleContact(employee.id)}
+                    />
+                  }
                 />
-                {employee.name}
-              </label>
-            ))}
-          </fieldset>
-          <p className="onboarding-page__hint">
+              ))}
+            </FormGroup>
+          </FormControl>
+          <Typography variant="body2">
             Default checklist ({defaults.length} tasks):{' '}
             {defaults.map((task) => task.title).join(' · ')}
-          </p>
-          <button type="submit">{saving ? 'Creating…' : 'Create plan'}</button>
-        </fieldset>
-      </form>
+          </Typography>
+          <Box>
+            <Button type="submit" variant="contained" disabled={saving || loading}>
+              {saving ? 'Creating…' : 'Create plan'}
+            </Button>
+          </Box>
+        </Stack>
+      </Paper>
 
       {plans.length > 0 ? (
-        <div className="onboarding-page__layout">
-          <section className="onboarding-page__list" aria-label="All plans">
-            <ul>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ alignItems: 'flex-start' }}>
+          <Paper
+            component="section"
+            aria-label="All plans"
+            sx={{ width: { xs: '100%', md: 300 }, flexShrink: 0 }}
+          >
+            <List disablePadding>
               {plans.map((plan) => (
-                <li key={plan.id}>
-                  <button
-                    type="button"
-                    className={
-                      selectedId === plan.id
-                        ? 'onboarding-page__item is-selected'
-                        : 'onboarding-page__item'
-                    }
-                    onClick={() => setSelectedId(plan.id)}
-                  >
-                    <strong>{plan.employee?.name ?? 'New hire'}</strong>
-                    <span>
-                      Manager {plan.manager?.name ?? 'n/a'} ·{' '}
-                      {plan.progress.percent}%
-                    </span>
-                  </button>
-                </li>
+                <ListItemButton
+                  key={plan.id}
+                  selected={selectedId === plan.id}
+                  onClick={() => setSelectedId(plan.id)}
+                  sx={{ display: 'block' }}
+                >
+                  <ListItemText
+                    primary={plan.employee?.name ?? 'New hire'}
+                    secondary={`Manager ${plan.manager?.name ?? 'n/a'} · ${plan.progress.percent}%`}
+                    slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+                  />
+                  <LinearProgress
+                    variant="determinate"
+                    value={plan.progress.percent}
+                    aria-label={`Onboarding progress for ${plan.employee?.name ?? 'New hire'}`}
+                    sx={{ mt: 0.75, height: 6, borderRadius: 3 }}
+                  />
+                </ListItemButton>
               ))}
-            </ul>
-          </section>
-          <section>
+            </List>
+          </Paper>
+          <Box component="section" sx={{ flex: 1, minWidth: 0, width: '100%' }}>
             {selected ? (
               <OnboardingPlanPanel
                 plan={selected}
@@ -297,10 +340,10 @@ function AdminOnboardingPage() {
                 }}
               />
             ) : null}
-          </section>
-        </div>
+          </Box>
+        </Stack>
       ) : null}
-    </main>
+    </Box>
   )
 }
 

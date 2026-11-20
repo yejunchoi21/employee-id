@@ -1,13 +1,26 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router-dom'
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  LinearProgress,
+  List,
+  ListItemButton,
+  ListItemText,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { ApiError } from '../api/client'
 import {
   fetchOnboardingPlans,
   type OnboardingPlanDto,
 } from '../api/onboarding'
 import OnboardingPlanPanel from '../components/OnboardingPlanPanel'
+import PageHeader from '../components/PageHeader'
 import { useAuth } from '../hooks/useAuth'
-import './OnboardingPages.css'
 
 function TeamOnboardingPage() {
   const { membership, isAuthLoading } = useAuth()
@@ -51,80 +64,95 @@ function TeamOnboardingPage() {
 
   if (isAuthLoading) {
     return (
-      <main className="onboarding-page">
-        <p className="onboarding-page__status">Checking your session…</p>
-      </main>
+      <Box component="main">
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          <CircularProgress size={18} />
+          <Typography variant="body2">Checking your session…</Typography>
+        </Stack>
+      </Box>
     )
   }
 
   if (!membership) {
     return (
-      <main className="onboarding-page">
-        <header className="onboarding-page__hero">
-          <h1>Team onboarding</h1>
-          <p>Sign in as a manager to track assigned new hires.</p>
-        </header>
-      </main>
+      <Box component="main">
+        <PageHeader
+          title="Team onboarding"
+          description="Sign in as a manager to track assigned new hires."
+        />
+      </Box>
     )
   }
 
   return (
-    <main className="onboarding-page">
-      <header className="onboarding-page__hero">
-        <div>
-          <p className="onboarding-page__eyebrow">Manager</p>
-          <h1>Team onboarding</h1>
-          <p>
-            Review progress, overdue work, and manage tasks for new hires
-            assigned to you. Buddy assignment alone does not unlock this view.
-          </p>
-        </div>
-        <Link to="/directory">Back to directory</Link>
-      </header>
+    <Box component="main">
+      <PageHeader
+        eyebrow="Manager"
+        title="Team onboarding"
+        description="Review progress, overdue work, and manage tasks for new hires assigned to you. Buddy assignment alone does not unlock this view."
+        actions={
+          <Button component={RouterLink} to="/directory" variant="outlined">
+            Back to directory
+          </Button>
+        }
+      />
 
       {loading ? (
-        <p className="onboarding-page__status">Loading managed plans…</p>
+        <Stack direction="row" spacing={1} sx={{ mb: 2, alignItems: 'center' }}>
+          <CircularProgress size={18} />
+          <Typography variant="body2">Loading managed plans…</Typography>
+        </Stack>
       ) : null}
       {error ? (
-        <p className="onboarding-page__error" role="alert">
+        <Alert severity="error" sx={{ mb: 2 }}>
           {error}
-        </p>
+        </Alert>
       ) : null}
       {!loading && !error && plans.length === 0 ? (
-        <p className="onboarding-page__status">
-          You are not assigned as manager on any onboarding plans yet.
-        </p>
+        <Paper sx={{ p: 3, textAlign: 'center' }}>
+          <Typography variant="subtitle1">No managed plans</Typography>
+          <Typography variant="body2">
+            You are not assigned as manager on any onboarding plans yet.
+          </Typography>
+        </Paper>
       ) : null}
 
       {plans.length > 0 ? (
-        <div className="onboarding-page__layout">
-          <section className="onboarding-page__list" aria-label="New hires">
-            <ul>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ alignItems: 'flex-start' }}>
+          <Paper
+            component="section"
+            aria-label="New hires"
+            sx={{ width: { xs: '100%', md: 300 }, flexShrink: 0 }}
+          >
+            <List disablePadding>
               {plans.map((plan) => (
-                <li key={plan.id}>
-                  <button
-                    type="button"
-                    className={
-                      selectedId === plan.id
-                        ? 'onboarding-page__item is-selected'
-                        : 'onboarding-page__item'
-                    }
-                    onClick={() => setSelectedId(plan.id)}
-                  >
-                    <strong>{plan.employee?.name ?? 'New hire'}</strong>
-                    <span>
-                      {plan.progress.percent}% · {plan.progress.remaining} left
-                      {plan.progress.overdue > 0
+                <ListItemButton
+                  key={plan.id}
+                  selected={selectedId === plan.id}
+                  onClick={() => setSelectedId(plan.id)}
+                  sx={{ display: 'block' }}
+                >
+                  <ListItemText
+                    primary={plan.employee?.name ?? 'New hire'}
+                    secondary={`${plan.progress.percent}% · ${plan.progress.remaining} left${
+                      plan.progress.overdue > 0
                         ? ` · ${plan.progress.overdue} overdue`
-                        : ''}
-                    </span>
-                  </button>
-                </li>
+                        : ''
+                    }`}
+                    slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+                  />
+                  <LinearProgress
+                    variant="determinate"
+                    value={plan.progress.percent}
+                    aria-label={`Onboarding progress for ${plan.employee?.name ?? 'New hire'}`}
+                    sx={{ mt: 0.75, height: 6, borderRadius: 3 }}
+                  />
+                </ListItemButton>
               ))}
-            </ul>
-          </section>
+            </List>
+          </Paper>
 
-          <section aria-live="polite">
+          <Box component="section" aria-live="polite" sx={{ flex: 1, minWidth: 0, width: '100%' }}>
             {selected ? (
               <OnboardingPlanPanel
                 plan={selected}
@@ -138,14 +166,14 @@ function TeamOnboardingPage() {
                 }}
               />
             ) : (
-              <p className="onboarding-page__status">
+              <Typography variant="body2">
                 Select a new hire to review their plan.
-              </p>
+              </Typography>
             )}
-          </section>
-        </div>
+          </Box>
+        </Stack>
       ) : null}
-    </main>
+    </Box>
   )
 }
 

@@ -1,7 +1,7 @@
 import type { KeyboardEvent } from 'react'
+import { Avatar, Box, Chip, Paper, Stack, Typography } from '@mui/material'
 import type { Employee } from '../data/employee'
 import { optionalText } from '../utils/displayField'
-import './EmployeeList.css'
 
 interface EmployeeListProps {
   employees: Employee[]
@@ -22,54 +22,85 @@ function EmployeeList({ employees, onViewProfile }: EmployeeListProps) {
   }
 
   return (
-    <div className="employee-list" role="list" aria-label="Employee list">
+    <Stack spacing={1} role="list" aria-label="Employee list">
       {employees.map((employee) => {
         const askMeAbout = optionalText(employee.askMeAbout)
         const timeZone = optionalText(employee.timeZone)
 
         return (
-          <div
+          <Paper
             key={employee.id}
-            className="employee-list__row"
             role="listitem"
             tabIndex={0}
             onClick={() => activate(employee)}
             onKeyDown={(event) => onKeyDown(event, employee)}
+            sx={{
+              p: 1.5,
+              cursor: 'pointer',
+              display: 'flex',
+              gap: 1.5,
+              alignItems: 'center',
+              flexDirection: { xs: 'column', sm: 'row' },
+              '&:hover': { borderColor: 'primary.light' },
+              '&:focus-visible': {
+                outline: '2px solid',
+                outlineColor: 'primary.main',
+                outlineOffset: 2,
+              },
+            }}
           >
-            <img
-              className="employee-list__photo"
+            <Avatar
               src={employee.photoUrl}
               alt=""
+              variant="rounded"
+              sx={{ width: 64, height: 64, flexShrink: 0 }}
             />
-            <div className="employee-list__main">
-              <div className="employee-list__topline">
-                <h3 className="employee-list__name">{employee.name}</h3>
+            <Box sx={{ minWidth: 0, flex: 1, width: '100%' }}>
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{ alignItems: 'center', flexWrap: 'wrap' }}
+                useFlexGap
+              >
+                <Typography variant="h3" component="h3">
+                  {employee.name}
+                </Typography>
                 {employee.isDemo ? (
-                  <span className="employee-list__demo">Demo profile</span>
+                  <Chip size="small" variant="outlined" label="Demo profile" />
                 ) : null}
-              </div>
-              <p className="employee-list__title">{employee.title}</p>
-              <p className="employee-list__meta">
+              </Stack>
+              <Typography variant="body1">{employee.title}</Typography>
+              <Typography variant="body2">
                 {employee.department}
                 {employee.office ? ` · ${employee.office}` : ''}
                 {timeZone ? ` · ${timeZone}` : ''}
-              </p>
+              </Typography>
               {askMeAbout ? (
-                <p className="employee-list__ask">Ask me about: {askMeAbout}</p>
+                <Typography variant="body2">Ask me about: {askMeAbout}</Typography>
               ) : null}
-            </div>
-            <div className="employee-list__side">
-              {employee.skills.slice(0, 3).map((skill) => (
-                <span key={skill} className="employee-list__skill">
-                  {skill}
-                </span>
-              ))}
-              <span className="employee-list__hint">Open profile</span>
-            </div>
-          </div>
+            </Box>
+            <Stack
+              spacing={0.5}
+              sx={{ alignItems: { xs: 'flex-start', sm: 'flex-end' }, flexShrink: 0 }}
+            >
+              <Stack
+                direction="row"
+                spacing={0.5}
+                useFlexGap
+                sx={{ flexWrap: 'wrap', justifyContent: { sm: 'flex-end' } }}
+              >
+                {employee.skills.slice(0, 3).map((skill) => (
+                  <Chip key={skill} size="small" label={skill} />
+                ))}
+              </Stack>
+              <Typography variant="caption" color="primary">
+                Open profile
+              </Typography>
+            </Stack>
+          </Paper>
         )
       })}
-    </div>
+    </Stack>
   )
 }
 

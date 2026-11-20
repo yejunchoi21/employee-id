@@ -1,9 +1,19 @@
-import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
+import { useId, useState, type FormEvent } from 'react'
+import {
+  Alert,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import type { Employee } from '../data/employee'
 import type { EmployeeSignupInput } from '../utils/createEmployee'
 import PortraitUploadField from './PortraitUploadField'
-import './EmployeeEditDialog.css'
-import './EmployeeSignupForm.css'
 
 interface EmployeeEditDialogProps {
   employee: Employee | null
@@ -21,8 +31,6 @@ function EmployeeEditDialog({
   onSave,
   onDelete,
 }: EmployeeEditDialogProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null)
-  const closeButtonRef = useRef<HTMLButtonElement>(null)
   const formId = useId()
   const titleId = useId()
 
@@ -69,47 +77,8 @@ function EmployeeEditDialog({
     }
   }
 
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-
-    const handleClose = () => {
-      document.body.classList.remove('edit-open')
-      onClose()
-    }
-
-    dialog.addEventListener('close', handleClose)
-    return () => dialog.removeEventListener('close', handleClose)
-  }, [onClose])
-
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-
-    if (employee) {
-      if (!dialog.open) {
-        dialog.showModal()
-      }
-      document.body.classList.add('edit-open')
-      window.requestAnimationFrame(() => {
-        closeButtonRef.current?.focus()
-      })
-      return
-    }
-
-    if (dialog.open) {
-      dialog.close()
-    }
-  }, [employee])
-
-  useEffect(() => {
-    return () => {
-      document.body.classList.remove('edit-open')
-    }
-  }, [])
-
   const requestClose = () => {
-    dialogRef.current?.close()
+    onClose()
   }
 
   const updateField = <K extends keyof EmployeeSignupInput>(
@@ -120,7 +89,7 @@ function EmployeeEditDialog({
     setError(null)
   }
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     if (!employee || !form || isSubmitting || isProcessingPortrait || isDeleting)
       return
@@ -176,43 +145,36 @@ function EmployeeEditDialog({
     (removePortrait ? null : employee?.photoUrl || null)
 
   return (
-    <dialog
-      ref={dialogRef}
-      className="employee-edit"
+    <Dialog
+      open={Boolean(employee && form)}
+      onClose={requestClose}
+      scroll="paper"
+      fullWidth
+      maxWidth="md"
       aria-labelledby={titleId}
-      onClick={(event) => {
-        if (event.target === dialogRef.current) {
-          requestClose()
-        }
+      transitionDuration={{ enter: 150, exit: 0 }}
+      slotProps={{
+        paper: {
+          component: 'form',
+          onSubmit: (event: FormEvent) => {
+            void handleSubmit(event)
+          },
+        },
       }}
     >
       {employee && form ? (
-        <div
-          className="employee-edit__sheet"
-          onClick={(event) => event.stopPropagation()}
-        >
-          <header className="employee-edit__header">
-            <div>
-              <p className="employee-edit__eyebrow">Your card</p>
-              <h2 id={titleId} className="employee-edit__title">
-                Edit employee card
-              </h2>
-            </div>
-            <button
-              ref={closeButtonRef}
-              type="button"
-              className="employee-edit__close"
-              onClick={requestClose}
-            >
-              Close
-            </button>
-          </header>
+        <>
+          <DialogTitle component="div" sx={{ pb: 1 }}>
+            <Typography variant="overline" color="primary" sx={{ display: 'block' }}>
+              Your card
+            </Typography>
+            <Typography variant="h2" id={titleId}>
+              Edit employee card
+            </Typography>
+          </DialogTitle>
 
-          <form
-            className="signup__form employee-edit__form"
-            onSubmit={(event) => void handleSubmit(event)}
-          >
-            <div className="signup__field signup__field--full">
+          <DialogContent dividers>
+            <Stack spacing={2}>
               <PortraitUploadField
                 portraitBlob={portraitBlob}
                 previewUrl={previewUrl}
@@ -225,36 +187,36 @@ function EmployeeEditDialog({
                   setError(null)
                 }}
               />
-            </div>
 
-            <div className="signup__grid">
-              <div className="signup__field">
-                <label htmlFor={`${formId}-name`}>Full name</label>
-                <input
+              <Box
+                sx={{
+                  display: 'grid',
+                  gap: 2,
+                  gridTemplateColumns: {
+                    xs: '1fr',
+                    sm: 'repeat(2, minmax(0, 1fr))',
+                  },
+                }}
+              >
+                <TextField
                   id={`${formId}-name`}
-                  type="text"
+                  label="Full name"
                   required
                   value={form.name}
                   disabled={busy}
                   onChange={(event) => updateField('name', event.target.value)}
                 />
-              </div>
-              <div className="signup__field">
-                <label htmlFor={`${formId}-title`}>Job title</label>
-                <input
-                  id={`${formId}-title`}
-                  type="text"
+                <TextField
+                  id={`${formId}-title-input`}
+                  label="Job title"
                   required
                   value={form.title}
                   disabled={busy}
                   onChange={(event) => updateField('title', event.target.value)}
                 />
-              </div>
-              <div className="signup__field">
-                <label htmlFor={`${formId}-department`}>Department</label>
-                <input
+                <TextField
                   id={`${formId}-department`}
-                  type="text"
+                  label="Department"
                   required
                   value={form.department}
                   disabled={busy}
@@ -262,45 +224,35 @@ function EmployeeEditDialog({
                     updateField('department', event.target.value)
                   }
                 />
-              </div>
-              <div className="signup__field">
-                <label htmlFor={`${formId}-office`}>Office</label>
-                <input
+                <TextField
                   id={`${formId}-office`}
-                  type="text"
+                  label="Office"
                   required
                   value={form.office}
                   disabled={busy}
                   onChange={(event) => updateField('office', event.target.value)}
                 />
-              </div>
-              <div className="signup__field">
-                <label htmlFor={`${formId}-email`}>Work email</label>
-                <input
+                <TextField
                   id={`${formId}-email`}
                   type="email"
+                  label="Work email"
                   required
                   value={form.email}
                   disabled={busy}
                   onChange={(event) => updateField('email', event.target.value)}
                 />
-              </div>
-              <div className="signup__field">
-                <label htmlFor={`${formId}-phone`}>Work phone</label>
-                <input
+                <TextField
                   id={`${formId}-phone`}
                   type="tel"
+                  label="Work phone"
                   required
                   value={form.phone}
                   disabled={busy}
                   onChange={(event) => updateField('phone', event.target.value)}
                 />
-              </div>
-              <div className="signup__field">
-                <label htmlFor={`${formId}-manager`}>Manager</label>
-                <input
+                <TextField
                   id={`${formId}-manager`}
-                  type="text"
+                  label="Manager"
                   required
                   value={form.manager}
                   disabled={busy}
@@ -308,25 +260,18 @@ function EmployeeEditDialog({
                     updateField('manager', event.target.value)
                   }
                 />
-              </div>
-              <div className="signup__field">
-                <label htmlFor={`${formId}-timezone`}>Time zone (optional)</label>
-                <input
+                <TextField
                   id={`${formId}-timezone`}
-                  type="text"
+                  label="Time zone (optional)"
                   placeholder="America/Los_Angeles"
                   value={form.timeZone ?? ''}
                   disabled={busy}
                   onChange={(event) => updateField('timeZone', event.target.value)}
                 />
-              </div>
-              <div className="signup__field">
-                <label htmlFor={`${formId}-chat`}>
-                  Work chat profile URL (optional)
-                </label>
-                <input
+                <TextField
                   id={`${formId}-chat`}
                   type="url"
+                  label="Work chat profile URL (optional)"
                   placeholder="https://"
                   value={form.chatProfileUrl ?? ''}
                   disabled={busy}
@@ -334,81 +279,77 @@ function EmployeeEditDialog({
                     updateField('chatProfileUrl', event.target.value)
                   }
                 />
-              </div>
-              <div className="signup__field">
-                <label htmlFor={`${formId}-skills`}>Skills</label>
-                <input
+                <TextField
                   id={`${formId}-skills`}
-                  type="text"
+                  label="Skills"
                   required
                   value={form.skills}
                   disabled={busy}
                   onChange={(event) => updateField('skills', event.target.value)}
                 />
-              </div>
-            </div>
+              </Box>
 
-            <div className="signup__field signup__field--full">
-              <label htmlFor={`${formId}-ask`}>Ask me about (optional)</label>
-              <textarea
+              <TextField
                 id={`${formId}-ask`}
-                rows={3}
+                label="Ask me about (optional)"
+                multiline
+                minRows={3}
                 value={form.askMeAbout ?? ''}
                 disabled={busy}
                 onChange={(event) =>
                   updateField('askMeAbout', event.target.value)
                 }
               />
-            </div>
 
-            <div className="signup__field signup__field--full">
-              <label htmlFor={`${formId}-bio`}>Short bio</label>
-              <textarea
+              <TextField
                 id={`${formId}-bio`}
+                label="Short bio"
                 required
-                rows={4}
+                multiline
+                minRows={4}
                 value={form.bio}
                 disabled={busy}
                 onChange={(event) => updateField('bio', event.target.value)}
               />
-            </div>
 
-            <div className="signup__footer">
               {error ? (
-                <p className="signup__error" role="alert">
-                  {error}
-                </p>
+                <Alert severity="error">{error}</Alert>
               ) : (
-                <p className="signup__help">
+                <Typography variant="caption" color="text.secondary">
                   You can only edit or delete cards you added in this browser.
-                </p>
+                </Typography>
               )}
-              <div className="employee-edit__actions">
-                {onDelete ? (
-                  <button
-                    type="button"
-                    className="employee-edit__delete"
-                    disabled={busy}
-                    onClick={() => {
-                      void handleDelete()
-                    }}
-                  >
-                    {isDeleting ? 'Deleting…' : 'Delete card'}
-                  </button>
-                ) : null}
-                <button type="submit" className="signup__submit" disabled={busy}>
-                  {isProcessingPortrait
-                    ? 'Processing photo…'
-                    : isSubmitting
-                      ? 'Saving…'
-                      : 'Save changes'}
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
+            </Stack>
+          </DialogContent>
+
+          <DialogActions sx={{ px: 3, py: 1.5, flexWrap: 'wrap', gap: 1 }}>
+            <Button type="button" onClick={requestClose}>
+              Close
+            </Button>
+            {onDelete ? (
+              <Button
+                type="button"
+                variant="outlined"
+                color="error"
+                disabled={busy}
+                onClick={() => {
+                  void handleDelete()
+                }}
+              >
+                {isDeleting ? 'Deleting…' : 'Delete card'}
+              </Button>
+            ) : null}
+            <Button type="submit" variant="contained" disabled={busy}>
+              {isProcessingPortrait
+                ? 'Processing photo…'
+                : isSubmitting
+                  ? 'Saving…'
+                  : 'Save changes'}
+            </Button>
+          </DialogActions>
+        </>
       ) : null}
-    </dialog>
+    </Dialog>
   )
 }
 

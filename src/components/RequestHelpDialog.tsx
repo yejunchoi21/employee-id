@@ -1,11 +1,27 @@
-import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
+import { useId, useState, type FormEvent } from 'react'
+import {
+  Alert,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  Radio,
+  RadioGroup,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import {
   createHelpRequest,
   type HelpRequestPriority,
 } from '../api/helpRequests'
 import { ApiError } from '../api/client'
 import type { Employee } from '../data/employee'
-import './RequestHelpDialog.css'
 
 interface RequestHelpDialogProps {
   employee: Employee | null
@@ -31,7 +47,6 @@ function RequestHelpForm({
   onClose: () => void
   onCreated: () => void
 }) {
-  const subjectRef = useRef<HTMLInputElement>(null)
   const titleId = useId()
   const errorId = useId()
   const [subject, setSubject] = useState('')
@@ -39,10 +54,6 @@ function RequestHelpForm({
   const [priority, setPriority] = useState<HelpRequestPriority>('normal')
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
-
-  useEffect(() => {
-    subjectRef.current?.focus()
-  }, [])
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -77,83 +88,84 @@ function RequestHelpForm({
   }
 
   return (
-    <form
-      className="request-help__sheet"
-      onClick={(event) => event.stopPropagation()}
-      onSubmit={(event) => {
+    <Box
+      component="form"
+      onSubmit={(event: FormEvent<HTMLFormElement>) => {
         void handleSubmit(event)
       }}
+      sx={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}
     >
-      <header className="request-help__header">
-        <div>
-          <p className="request-help__eyebrow">Help request</p>
-          <h2 id={titleId}>Request help from {employee.name}</h2>
-        </div>
-        <button type="button" onClick={onClose} disabled={saving}>
-          Close
-        </button>
-      </header>
+      <DialogTitle component="div" sx={{ pb: 1 }}>
+        <Typography variant="overline" color="primary" sx={{ display: 'block' }}>
+          Help request
+        </Typography>
+        <Typography variant="h2" id={titleId}>
+          Request help from {employee.name}
+        </Typography>
+      </DialogTitle>
 
-      <div className="request-help__body">
-        <label className="request-help__field">
-          <span>Subject</span>
-          <input
-            ref={subjectRef}
+      <DialogContent dividers>
+        <Stack spacing={2}>
+          <TextField
+            label="Subject"
             value={subject}
             onChange={(event) => setSubject(event.target.value)}
-            maxLength={160}
             required
+            autoFocus
             disabled={saving}
             autoComplete="off"
+            slotProps={{ htmlInput: { maxLength: 160 } }}
           />
-        </label>
 
-        <label className="request-help__field">
-          <span>Question</span>
-          <textarea
+          <TextField
+            label="Question"
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
-            maxLength={4000}
-            rows={5}
+            multiline
+            minRows={5}
             required
             disabled={saving}
+            slotProps={{ htmlInput: { maxLength: 4000 } }}
           />
-        </label>
 
-        <fieldset className="request-help__priority" disabled={saving}>
-          <legend>Priority</legend>
-          <div className="request-help__priority-options">
-            {priorities.map((option) => (
-              <label key={option.value}>
-                <input
-                  type="radio"
-                  name="help-priority"
+          <FormControl component="fieldset" disabled={saving}>
+            <FormLabel component="legend">Priority</FormLabel>
+            <RadioGroup
+              row
+              name="help-priority"
+              value={priority}
+              onChange={(event) =>
+                setPriority(event.target.value as HelpRequestPriority)
+              }
+            >
+              {priorities.map((option) => (
+                <FormControlLabel
+                  key={option.value}
                   value={option.value}
-                  checked={priority === option.value}
-                  onChange={() => setPriority(option.value)}
+                  control={<Radio size="small" />}
+                  label={option.label}
                 />
-                {option.label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
+              ))}
+            </RadioGroup>
+          </FormControl>
 
-        {error ? (
-          <p id={errorId} className="request-help__error" role="alert">
-            {error}
-          </p>
-        ) : null}
-      </div>
+          {error ? (
+            <Alert severity="error" id={errorId}>
+              {error}
+            </Alert>
+          ) : null}
+        </Stack>
+      </DialogContent>
 
-      <footer className="request-help__footer">
-        <button type="button" onClick={onClose} disabled={saving}>
+      <DialogActions sx={{ px: 3, py: 1.5 }}>
+        <Button type="button" onClick={onClose} disabled={saving}>
           Cancel
-        </button>
-        <button type="submit" disabled={saving}>
+        </Button>
+        <Button type="submit" variant="contained" disabled={saving}>
           {saving ? 'Sending…' : 'Send request'}
-        </button>
-      </footer>
-    </form>
+        </Button>
+      </DialogActions>
+    </Box>
   )
 }
 
@@ -163,62 +175,28 @@ function RequestHelpDialog({
   onClose,
   onCreated,
 }: RequestHelpDialogProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null)
-
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-
-    const handleClose = () => {
-      onClose()
-    }
-    const handleCancel = (event: Event) => {
-      event.preventDefault()
-      dialog.close()
-    }
-
-    dialog.addEventListener('close', handleClose)
-    dialog.addEventListener('cancel', handleCancel)
-    return () => {
-      dialog.removeEventListener('close', handleClose)
-      dialog.removeEventListener('cancel', handleCancel)
-    }
-  }, [onClose])
-
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-
-    if (employee && recipientEmployeeId) {
-      if (!dialog.open) dialog.showModal()
-      return
-    }
-
-    if (dialog.open) dialog.close()
-  }, [employee, recipientEmployeeId])
-
-  const requestClose = () => {
-    dialogRef.current?.close()
-  }
+  const open = Boolean(employee && recipientEmployeeId)
 
   return (
-    <dialog
-      ref={dialogRef}
-      className="request-help"
-      onClick={(event) => {
-        if (event.target === dialogRef.current) requestClose()
-      }}
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="sm"
+      scroll="paper"
+      aria-label="Request help"
+      transitionDuration={{ enter: 150, exit: 0 }}
     >
       {employee && recipientEmployeeId ? (
         <RequestHelpForm
           key={`${employee.id}-${recipientEmployeeId}`}
           employee={employee}
           recipientEmployeeId={recipientEmployeeId}
-          onClose={requestClose}
+          onClose={onClose}
           onCreated={onCreated}
         />
       ) : null}
-    </dialog>
+    </Dialog>
   )
 }
 

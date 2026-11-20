@@ -1,9 +1,17 @@
 import { useEffect, useId, useState, type FormEvent } from 'react'
+import {
+  Alert,
+  Autocomplete,
+  Box,
+  Button,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { SUGGESTED_DEPARTMENTS } from '../data/departments'
 import type { EmployeeSignupInput } from '../utils/createEmployee'
 import PortraitUploadField from './PortraitUploadField'
-import './EmployeeSignupForm.css'
-
 interface EmployeeSignupFormProps {
   onSubmit: (
     input: EmployeeSignupInput,
@@ -88,226 +96,193 @@ function EmployeeSignupForm({
   const busy = isSubmitting || isProcessingPortrait
 
   return (
-    <section className="signup" aria-labelledby={`${formId}-title`}>
-      <div className="signup__intro">
-        <h2 id={`${formId}-title`} className="signup__title">
+    <Paper component="section" aria-labelledby={`${formId}-title`} sx={{ p: { xs: 2, sm: 3 } }}>
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="h2" id={`${formId}-title`}>
           Sign up for the directory
-        </h2>
-        <p className="signup__copy">
+        </Typography>
+        <Typography variant="body2" sx={{ mt: 0.5, maxWidth: 640 }}>
           Add your custom employee info to create a card for the 360° rack.
           This is a browser-only demo, not a real account registration system.
-        </p>
-      </div>
+        </Typography>
+      </Box>
 
-      <form className="signup__form" onSubmit={(event) => void handleSubmit(event)}>
-        <div className="signup__field signup__field--full">
-          <PortraitUploadField
-            portraitBlob={portraitBlob}
-            previewUrl={portraitPreviewUrl}
-            disabled={isSubmitting}
-            onProcessingChange={setIsProcessingPortrait}
-            onPortraitChange={({ blob, previewUrl }) => {
-              setPortraitBlob(blob)
-              setPortraitPreviewUrl(previewUrl)
-              setError(null)
-            }}
-          />
-        </div>
+      <Stack
+        component="form"
+        spacing={2}
+        onSubmit={(event: FormEvent<HTMLFormElement>) => void handleSubmit(event)}
+      >
+        <PortraitUploadField
+          portraitBlob={portraitBlob}
+          previewUrl={portraitPreviewUrl}
+          disabled={isSubmitting}
+          onProcessingChange={setIsProcessingPortrait}
+          onPortraitChange={({ blob, previewUrl }) => {
+            setPortraitBlob(blob)
+            setPortraitPreviewUrl(previewUrl)
+            setError(null)
+          }}
+        />
 
-        <div className="signup__grid">
-          <div className="signup__field">
-            <label htmlFor={`${formId}-name`}>Full name</label>
-            <input
-              id={`${formId}-name`}
-              name="name"
-              type="text"
-              required
-              autoComplete="name"
-              value={form.name}
-              disabled={busy}
-              onChange={(event) => updateField('name', event.target.value)}
-            />
-          </div>
-
-          <div className="signup__field">
-            <label htmlFor={`${formId}-title`}>Job title</label>
-            <input
-              id={`${formId}-title`}
-              name="title"
-              type="text"
-              required
-              value={form.title}
-              disabled={busy}
-              onChange={(event) => updateField('title', event.target.value)}
-            />
-          </div>
-
-          <div className="signup__field">
-            <label htmlFor={`${formId}-department`}>Department</label>
-            <input
-              id={`${formId}-department`}
-              name="department"
-              type="text"
-              required
-              list={`${formId}-departments`}
-              value={form.department}
-              disabled={busy}
-              onChange={(event) => updateField('department', event.target.value)}
-            />
-            <datalist id={`${formId}-departments`}>
-              {SUGGESTED_DEPARTMENTS.map((name) => (
-                <option key={name} value={name} />
-              ))}
-            </datalist>
-          </div>
-
-          <div className="signup__field">
-            <label htmlFor={`${formId}-office`}>Office</label>
-            <input
-              id={`${formId}-office`}
-              name="office"
-              type="text"
-              required
-              value={form.office}
-              disabled={busy}
-              onChange={(event) => updateField('office', event.target.value)}
-            />
-          </div>
-
-          <div className="signup__field">
-            <label htmlFor={`${formId}-email`}>Work email</label>
-            <input
-              id={`${formId}-email`}
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              value={form.email}
-              disabled={busy}
-              onChange={(event) => updateField('email', event.target.value)}
-            />
-          </div>
-
-          <div className="signup__field">
-            <label htmlFor={`${formId}-phone`}>Work phone</label>
-            <input
-              id={`${formId}-phone`}
-              name="phone"
-              type="tel"
-              required
-              autoComplete="tel"
-              value={form.phone}
-              disabled={busy}
-              onChange={(event) => updateField('phone', event.target.value)}
-            />
-          </div>
-
-          <div className="signup__field">
-            <label htmlFor={`${formId}-manager`}>Manager</label>
-            <input
-              id={`${formId}-manager`}
-              name="manager"
-              type="text"
-              required
-              value={form.manager}
-              disabled={busy}
-              onChange={(event) => updateField('manager', event.target.value)}
-            />
-          </div>
-
-          <div className="signup__field">
-            <label htmlFor={`${formId}-timezone`}>Time zone (optional)</label>
-            <input
-              id={`${formId}-timezone`}
-              name="timeZone"
-              type="text"
-              placeholder="America/Los_Angeles"
-              value={form.timeZone ?? ''}
-              disabled={busy}
-              onChange={(event) => updateField('timeZone', event.target.value)}
-            />
-          </div>
-
-          <div className="signup__field">
-            <label htmlFor={`${formId}-chat`}>
-              Work chat profile URL (optional)
-            </label>
-            <input
-              id={`${formId}-chat`}
-              name="chatProfileUrl"
-              type="url"
-              placeholder="https://"
-              value={form.chatProfileUrl ?? ''}
-              disabled={busy}
-              onChange={(event) =>
-                updateField('chatProfileUrl', event.target.value)
-              }
-            />
-            <p className="signup__help">HTTPS links only for the open-chat action.</p>
-          </div>
-
-          <div className="signup__field">
-            <label htmlFor={`${formId}-skills`}>Skills</label>
-            <input
-              id={`${formId}-skills`}
-              name="skills"
-              type="text"
-              required
-              placeholder="Design systems, React, Writing"
-              value={form.skills}
-              disabled={busy}
-              onChange={(event) => updateField('skills', event.target.value)}
-            />
-            <p className="signup__help">Separate skills with commas.</p>
-          </div>
-        </div>
-
-        <div className="signup__field signup__field--full">
-          <label htmlFor={`${formId}-ask`}>Ask me about (optional)</label>
-          <textarea
-            id={`${formId}-ask`}
-            name="askMeAbout"
-            rows={3}
-            placeholder="Design systems, onboarding, accessibility reviews"
-            value={form.askMeAbout ?? ''}
-            disabled={busy}
-            onChange={(event) => updateField('askMeAbout', event.target.value)}
-          />
-        </div>
-
-        <div className="signup__field signup__field--full">
-          <label htmlFor={`${formId}-bio`}>Short bio</label>
-          <textarea
-            id={`${formId}-bio`}
-            name="bio"
+        <Box
+          sx={{
+            display: 'grid',
+            gap: 2,
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' },
+          }}
+        >
+          <TextField
+            id={`${formId}-name`}
+            name="name"
+            label="Full name"
             required
-            rows={4}
-            value={form.bio}
+            autoComplete="name"
+            value={form.name}
             disabled={busy}
-            onChange={(event) => updateField('bio', event.target.value)}
+            onChange={(event) => updateField('name', event.target.value)}
           />
-        </div>
+          <TextField
+            id={`${formId}-title-input`}
+            name="title"
+            label="Job title"
+            required
+            value={form.title}
+            disabled={busy}
+            onChange={(event) => updateField('title', event.target.value)}
+          />
+          <Autocomplete
+            freeSolo
+            disabled={busy}
+            options={SUGGESTED_DEPARTMENTS}
+            inputValue={form.department}
+            onInputChange={(_, value) => updateField('department', value)}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                id={`${formId}-department`}
+                name="department"
+                label="Department"
+                required
+              />
+            )}
+          />
+          <TextField
+            id={`${formId}-office`}
+            name="office"
+            label="Office"
+            required
+            value={form.office}
+            disabled={busy}
+            onChange={(event) => updateField('office', event.target.value)}
+          />
+          <TextField
+            id={`${formId}-email`}
+            name="email"
+            type="email"
+            label="Work email"
+            required
+            autoComplete="email"
+            value={form.email}
+            disabled={busy}
+            onChange={(event) => updateField('email', event.target.value)}
+          />
+          <TextField
+            id={`${formId}-phone`}
+            name="phone"
+            type="tel"
+            label="Work phone"
+            required
+            autoComplete="tel"
+            value={form.phone}
+            disabled={busy}
+            onChange={(event) => updateField('phone', event.target.value)}
+          />
+          <TextField
+            id={`${formId}-manager`}
+            name="manager"
+            label="Manager"
+            required
+            value={form.manager}
+            disabled={busy}
+            onChange={(event) => updateField('manager', event.target.value)}
+          />
+          <TextField
+            id={`${formId}-timezone`}
+            name="timeZone"
+            label="Time zone (optional)"
+            placeholder="America/Los_Angeles"
+            value={form.timeZone ?? ''}
+            disabled={busy}
+            onChange={(event) => updateField('timeZone', event.target.value)}
+          />
+          <TextField
+            id={`${formId}-chat`}
+            name="chatProfileUrl"
+            type="url"
+            label="Work chat profile URL (optional)"
+            placeholder="https://"
+            helperText="HTTPS links only for the open-chat action."
+            value={form.chatProfileUrl ?? ''}
+            disabled={busy}
+            onChange={(event) =>
+              updateField('chatProfileUrl', event.target.value)
+            }
+          />
+          <TextField
+            id={`${formId}-skills`}
+            name="skills"
+            label="Skills"
+            required
+            placeholder="Design systems, React, Writing"
+            helperText="Separate skills with commas."
+            value={form.skills}
+            disabled={busy}
+            onChange={(event) => updateField('skills', event.target.value)}
+          />
+        </Box>
 
-        <div className="signup__footer">
-          {error ? (
-            <p className="signup__error" role="alert">
-              {error}
-            </p>
-          ) : (
-            <p className="signup__help">
-              Browser-only demo. No password, accounts, or database are used.
-            </p>
-          )}
-          <button type="submit" className="signup__submit" disabled={busy}>
+        <TextField
+          id={`${formId}-ask`}
+          name="askMeAbout"
+          label="Ask me about (optional)"
+          multiline
+          minRows={3}
+          placeholder="Design systems, onboarding, accessibility reviews"
+          value={form.askMeAbout ?? ''}
+          disabled={busy}
+          onChange={(event) => updateField('askMeAbout', event.target.value)}
+        />
+
+        <TextField
+          id={`${formId}-bio`}
+          name="bio"
+          label="Short bio"
+          multiline
+          minRows={4}
+          required
+          value={form.bio}
+          disabled={busy}
+          onChange={(event) => updateField('bio', event.target.value)}
+        />
+
+        {error ? (
+          <Alert severity="error">{error}</Alert>
+        ) : (
+          <Typography variant="caption" color="text.secondary">
+            Browser-only demo. No password, accounts, or database are used.
+          </Typography>
+        )}
+        <Box>
+          <Button type="submit" variant="contained" disabled={busy}>
             {isProcessingPortrait
               ? 'Processing photo…'
               : isSubmitting
                 ? 'Creating…'
                 : submitLabel}
-          </button>
-        </div>
-      </form>
-    </section>
+          </Button>
+        </Box>
+      </Stack>
+    </Paper>
   )
 }
 

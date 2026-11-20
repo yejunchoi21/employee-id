@@ -4,6 +4,7 @@ export const employeeApprovalStatuses = [
   'pending',
   'approved',
   'rejected',
+  'inactive',
 ] as const
 export type EmployeeApprovalStatus = (typeof employeeApprovalStatuses)[number]
 

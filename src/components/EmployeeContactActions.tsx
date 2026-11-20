@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
+import { Box, Button, Stack, Typography } from '@mui/material'
 import type { Employee } from '../data/employee'
 import { getValidHttpsUrl } from '../utils/chatUrl'
 import { optionalText } from '../utils/displayField'
-import './EmployeeContactActions.css'
 
 interface EmployeeContactActionsProps {
   employee: Employee
@@ -34,43 +34,57 @@ function EmployeeContactActions({ employee }: EmployeeContactActionsProps) {
   }
 
   return (
-    <div className="employee-contact">
-      <div className="employee-contact__actions">
+    <Box>
+      <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
         {email ? (
           <>
-            <a className="employee-contact__button" href={`mailto:${email}`}>
+            <Button
+              component="a"
+              href={`mailto:${email}`}
+              variant="contained"
+              size="small"
+            >
               Email
-            </a>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="employee-contact__button employee-contact__button--secondary"
+              variant="outlined"
+              size="small"
               onClick={() => {
                 void handleCopy()
               }}
             >
               Copy email
-            </button>
+            </Button>
           </>
         ) : null}
         {chatUrl ? (
-          <a
-            className="employee-contact__button employee-contact__button--secondary"
+          <Button
+            component="a"
             href={chatUrl}
             target="_blank"
             rel="noopener noreferrer"
+            variant="outlined"
+            size="small"
           >
             Open work chat profile
-          </a>
+          </Button>
         ) : null}
-      </div>
-      <p className="employee-contact__status" role="status" aria-live="polite">
+      </Stack>
+      <Typography
+        variant="caption"
+        color={copyStatus === 'error' ? 'error' : 'text.secondary'}
+        role="status"
+        aria-live="polite"
+        sx={{ display: 'block', minHeight: '1.5em', mt: 0.5 }}
+      >
         {copyStatus === 'success'
           ? 'Email copied.'
           : copyStatus === 'error'
             ? 'Could not copy email. Try again.'
             : ''}
-      </p>
-    </div>
+      </Typography>
+    </Box>
   )
 }
 

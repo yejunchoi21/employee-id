@@ -1,11 +1,31 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState, type ChangeEvent } from 'react'
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  CircularProgress,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { portraitPlaceholder } from '../data/employee'
 import {
   MAX_PORTRAIT_BYTES,
   PortraitProcessingError,
   processPortraitFile,
 } from '../utils/processPortrait'
-import './PortraitUploadField.css'
+
+const visuallyHiddenInput = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  p: 0,
+  m: -1,
+  overflow: 'hidden',
+  clip: 'rect(0 0 0 0)',
+  whiteSpace: 'nowrap',
+  border: 0,
+} as const
 
 interface PortraitUploadFieldProps {
   portraitBlob: Blob | null
@@ -93,83 +113,97 @@ function PortraitUploadField({
   const hasPhoto = Boolean(previewUrl || portraitBlob)
 
   return (
-    <div className="portrait-upload">
-      <div className="portrait-upload__header">
-        <label htmlFor={fieldId}>Employee photo</label>
-        <p className="portrait-upload__meta">
+    <Box>
+      <Stack
+        direction="row"
+        spacing={1}
+        useFlexGap
+        sx={{ alignItems: 'baseline', flexWrap: 'wrap', mb: 1 }}
+      >
+        <Typography variant="subtitle1" component="label" htmlFor={fieldId}>
+          Employee photo
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
           PNG, JPEG, or PDF · max {Math.round(MAX_PORTRAIT_BYTES / (1024 * 1024))}{' '}
           MB
-        </p>
-      </div>
+        </Typography>
+      </Stack>
 
-      <div className="portrait-upload__body">
-        <div className="portrait-upload__preview-wrap">
-          <img
-            className="portrait-upload__preview"
-            src={previewUrl ?? portraitPlaceholder}
-            alt={
-              previewUrl
-                ? 'Selected employee photo preview'
-                : 'Default employee portrait placeholder'
-            }
-          />
-        </div>
+      <Stack direction="row" spacing={2} sx={{ alignItems: 'flex-start' }}>
+        <Avatar
+          variant="rounded"
+          src={previewUrl ?? portraitPlaceholder}
+          alt={
+            previewUrl
+              ? 'Selected employee photo preview'
+              : 'Default employee portrait placeholder'
+          }
+          sx={{ width: 96, height: 96, flexShrink: 0, bgcolor: 'action.hover' }}
+        />
 
-        <div className="portrait-upload__controls">
-          <input
+        <Stack spacing={1} sx={{ minWidth: 0, flex: 1 }}>
+          <Box
+            component="input"
             ref={inputRef}
             id={fieldId}
             type="file"
             accept="image/png,image/jpeg,.png,.jpg,.jpeg,application/pdf,.pdf"
             disabled={disabled || isProcessing}
-            onChange={(event) => {
+            onChange={(event: ChangeEvent<HTMLInputElement>) => {
               void handleFile(event.target.files?.[0])
             }}
+            sx={visuallyHiddenInput}
           />
 
-          <p className="portrait-upload__help">
+          <Typography variant="caption" color="text.secondary">
             For PDFs, we use the first page.
-          </p>
+          </Typography>
 
           {fileLabel ? (
-            <p className="portrait-upload__file">{fileLabel}</p>
+            <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
+              {fileLabel}
+            </Typography>
           ) : null}
 
           {isProcessing ? (
-            <p className="portrait-upload__status" role="status">
-              Processing photo…
-            </p>
+            <Stack
+              direction="row"
+              spacing={1}
+              role="status"
+              sx={{ alignItems: 'center' }}
+            >
+              <CircularProgress size={16} />
+              <Typography variant="body2">Processing photo…</Typography>
+            </Stack>
           ) : null}
 
-          {error ? (
-            <p className="portrait-upload__error" role="alert">
-              {error}
-            </p>
-          ) : null}
+          {error ? <Alert severity="error">{error}</Alert> : null}
 
-          <div className="portrait-upload__actions">
-            <button
+          <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
+            <Button
               type="button"
-              className="portrait-upload__button"
+              variant="outlined"
+              size="small"
               disabled={disabled || isProcessing}
               onClick={() => inputRef.current?.click()}
             >
               {hasPhoto ? 'Replace photo' : 'Choose photo'}
-            </button>
+            </Button>
             {hasPhoto ? (
-              <button
+              <Button
                 type="button"
-                className="portrait-upload__button portrait-upload__button--secondary"
+                variant="text"
+                size="small"
                 disabled={disabled || isProcessing}
                 onClick={clearPortrait}
               >
                 Remove photo
-              </button>
+              </Button>
             ) : null}
-          </div>
-        </div>
-      </div>
-    </div>
+          </Stack>
+        </Stack>
+      </Stack>
+    </Box>
   )
 }
 

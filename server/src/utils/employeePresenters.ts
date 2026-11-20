@@ -4,7 +4,7 @@ type EmployeeLean = {
   _id: Types.ObjectId
   companyId: Types.ObjectId
   departmentId: Types.ObjectId
-  approvalStatus: 'pending' | 'approved' | 'rejected'
+  approvalStatus: 'pending' | 'approved' | 'rejected' | 'inactive'
   employeeCode: string
   name: string
   title: string

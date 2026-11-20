@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
-import './DirectoryEmptyState.css'
+import { Link as RouterLink } from 'react-router-dom'
+import { Button, Paper, Typography } from '@mui/material'
 
 interface DirectoryEmptyStateProps {
   onClear: () => void
@@ -14,39 +14,39 @@ function DirectoryEmptyState({
 }: DirectoryEmptyStateProps) {
   if (!hasAnyEmployees) {
     return (
-      <div className="directory-empty" role="status">
-        <p className="directory-empty__eyebrow">Empty rack</p>
-        <h2 className="directory-empty__title">No employee cards yet</h2>
-        <p className="directory-empty__message">
+      <Paper role="status" sx={{ p: 4, textAlign: 'center' }}>
+        <Typography variant="overline" color="primary" sx={{ display: 'block' }}>
+          Empty rack
+        </Typography>
+        <Typography variant="h2">No employee cards yet</Typography>
+        <Typography variant="body2" sx={{ mt: 1, mb: 2, mx: 'auto', maxWidth: 520 }}>
           Add an employee to start the directory, or refresh to load the labeled
           fictional demo profiles. Your saved cards stay in this browser and are
           never overwritten.
-        </p>
-        <Link className="directory-empty__clear" to="/signup">
+        </Typography>
+        <Button component={RouterLink} to="/signup" variant="contained">
           Add employee
-        </Link>
-      </div>
+        </Button>
+      </Paper>
     )
   }
 
   return (
-    <div className="directory-empty" role="status">
-      <p className="directory-empty__eyebrow">No matches</p>
-      <h2 className="directory-empty__title">No employees found</h2>
-      <p className="directory-empty__message">
+    <Paper role="status" sx={{ p: 4, textAlign: 'center' }}>
+      <Typography variant="overline" color="primary" sx={{ display: 'block' }}>
+        No matches
+      </Typography>
+      <Typography variant="h2">No employees found</Typography>
+      <Typography variant="body2" sx={{ mt: 1, mb: filtersActive ? 2 : 0, mx: 'auto', maxWidth: 520 }}>
         No matches for that expertise search or department. Try another skill
         keyword, choose a different department, or clear filters.
-      </p>
+      </Typography>
       {filtersActive ? (
-        <button
-          type="button"
-          className="directory-empty__clear"
-          onClick={onClear}
-        >
+        <Button type="button" variant="contained" onClick={onClear}>
           Clear filters
-        </button>
+        </Button>
       ) : null}
-    </div>
+    </Paper>
   )
 }
 

@@ -1,10 +1,21 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Link as RouterLink, Navigate } from 'react-router-dom'
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  MenuItem,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { createEmployeeAccountRequest } from '../api/auth'
 import { ApiError } from '../api/client'
 import { fetchDepartments } from '../api/helpRequests'
+import PageHeader from '../components/PageHeader'
 import { useAuth } from '../hooks/useAuth'
-import './AdminCreateAccountPage.css'
 
 interface DepartmentOption {
   id: string
@@ -64,18 +75,23 @@ function AdminCreateAccountPage() {
 
   if (isAuthLoading) {
     return (
-      <main className="admin-accounts">
-        <p>Checking your session…</p>
-      </main>
+      <Box component="main">
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          <CircularProgress size={18} />
+          <Typography variant="body2">Checking your session…</Typography>
+        </Stack>
+      </Box>
     )
   }
 
   if (!membership) {
     return (
-      <main className="admin-accounts">
-        <h1>Create employee account</h1>
-        <p>Sign in as an admin to provision employee accounts.</p>
-      </main>
+      <Box component="main">
+        <PageHeader
+          title="Create employee account"
+          description="Sign in as an admin to provision employee accounts."
+        />
+      </Box>
     )
   }
 
@@ -131,152 +147,147 @@ function AdminCreateAccountPage() {
     }
   }
 
-  return (
-    <main className="admin-accounts">
-      <header className="admin-accounts__hero">
-        <div>
-          <p className="admin-accounts__eyebrow">Admin</p>
-          <h1>Create employee account</h1>
-          <p>
-            Provision a member login linked to a directory profile. No public
-            signup — only admins can create accounts.
-          </p>
-        </div>
-        <Link to="/directory">Back to directory</Link>
-      </header>
+  const busy = saving || loadingDepartments
 
-      <form
-        className="admin-accounts__form"
+  return (
+    <Box component="main">
+      <PageHeader
+        eyebrow="Admin"
+        title="Create employee account"
+        description="Provision a member login linked to a directory profile. No public signup — only admins can create accounts."
+        actions={
+          <Button component={RouterLink} to="/directory" variant="outlined">
+            Back to directory
+          </Button>
+        }
+      />
+
+      <Stack
+        component="form"
+        spacing={2}
         onSubmit={(event) => {
           void handleSubmit(event)
         }}
+        sx={{ maxWidth: 640 }}
       >
-        <fieldset disabled={saving || loadingDepartments}>
-          <legend>Account</legend>
-          <label>
-            <span>Work email</span>
-            <input
+        <Paper sx={{ p: 2 }}>
+          <Stack
+            component="fieldset"
+            spacing={2}
+            disabled={busy}
+            sx={{ border: 0, m: 0, p: 0, minWidth: 0 }}
+          >
+            <Typography variant="subtitle1" component="legend" sx={{ p: 0, mb: 1.5 }}>
+              Account
+            </Typography>
+            <TextField
+              label="Work email"
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               required
               autoComplete="off"
             />
-          </label>
-          <label>
-            <span>Display name</span>
-            <input
+            <TextField
+              label="Display name"
               value={displayName}
               onChange={(event) => setDisplayName(event.target.value)}
               required
-              maxLength={120}
+              slotProps={{ htmlInput: { maxLength: 120 } }}
             />
-          </label>
-          <label>
-            <span>Initial password (temporary)</span>
-            <input
+            <TextField
+              label="Initial password (temporary)"
               type="password"
               value={initialPassword}
               onChange={(event) => setInitialPassword(event.target.value)}
               required
-              minLength={8}
               autoComplete="new-password"
+              slotProps={{ htmlInput: { minLength: 8 } }}
             />
-          </label>
-        </fieldset>
+          </Stack>
+        </Paper>
 
-        <fieldset disabled={saving || loadingDepartments}>
-          <legend>Employee profile</legend>
-          <label>
-            <span>Department</span>
-            <select
+        <Paper sx={{ p: 2 }}>
+          <Stack
+            component="fieldset"
+            spacing={2}
+            disabled={busy}
+            sx={{ border: 0, m: 0, p: 0, minWidth: 0 }}
+          >
+            <Typography variant="subtitle1" component="legend" sx={{ p: 0, mb: 1.5 }}>
+              Employee profile
+            </Typography>
+            <TextField
+              select
+              label="Department"
               value={departmentId}
               onChange={(event) => setDepartmentId(event.target.value)}
               required
             >
               {departments.map((department) => (
-                <option key={department.id} value={department.id}>
+                <MenuItem key={department.id} value={department.id}>
                   {department.name}
-                </option>
+                </MenuItem>
               ))}
-            </select>
-          </label>
-          <label>
-            <span>Title</span>
-            <input
+            </TextField>
+            <TextField
+              label="Title"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               required
             />
-          </label>
-          <label>
-            <span>Office</span>
-            <input
+            <TextField
+              label="Office"
               value={office}
               onChange={(event) => setOffice(event.target.value)}
               required
             />
-          </label>
-          <label>
-            <span>Joined</span>
-            <input
+            <TextField
+              label="Joined"
               value={joined}
               onChange={(event) => setJoined(event.target.value)}
               placeholder="Jan 2025"
               required
             />
-          </label>
-          <label>
-            <span>Phone</span>
-            <input
+            <TextField
+              label="Phone"
               value={phone}
               onChange={(event) => setPhone(event.target.value)}
               required
             />
-          </label>
-          <label>
-            <span>Manager</span>
-            <input
+            <TextField
+              label="Manager"
               value={manager}
               onChange={(event) => setManager(event.target.value)}
               required
             />
-          </label>
-          <label>
-            <span>Bio</span>
-            <textarea
+            <TextField
+              label="Bio"
               value={bio}
               onChange={(event) => setBio(event.target.value)}
-              rows={3}
+              multiline
+              minRows={3}
               required
             />
-          </label>
-          <label>
-            <span>Skills (comma-separated)</span>
-            <input
+            <TextField
+              label="Skills (comma-separated)"
               value={skills}
               onChange={(event) => setSkills(event.target.value)}
               required
             />
-          </label>
-        </fieldset>
+          </Stack>
+        </Paper>
 
-        {error ? (
-          <p className="admin-accounts__error" role="alert">
-            {error}
-          </p>
-        ) : null}
-        {success ? (
-          <p className="admin-accounts__success" role="status">
-            {success}
-          </p>
-        ) : null}
+        {error ? <Alert severity="error">{error}</Alert> : null}
+        {success ? <Alert severity="success">{success}</Alert> : null}
 
-        <button type="submit" disabled={saving || loadingDepartments}>
-          {saving ? 'Creating…' : 'Create employee account'}
-        </button>
-      </form>
-    </main>
+        <Box>
+          <Button type="submit" variant="contained" disabled={busy}>
+            {saving ? 'Creating…' : 'Create employee account'}
+          </Button>
+        </Box>
+      </Stack>
+    </Box>
   )
 }
 

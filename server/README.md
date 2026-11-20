@@ -12,6 +12,7 @@ employee accounts, help requests, and approval-gated employee submissions.
 - Default company departments as DB records with stable IDs
 - Help-request APIs with sender/recipient access control
 - New-hire onboarding plans (copied default checklist, manager/new-hire task ownership)
+- Equipment inventory, requests, assignments, and returns
 - Employee submission + approval APIs
 
 Pending and rejected cards are excluded from `/api/employees/published`.
